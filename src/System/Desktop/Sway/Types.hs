@@ -1,7 +1,13 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module System.Desktop.Sway.Types where
 
+import           Data.Binary.Get
+import           Data.Binary.Put
 import           Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BL
+import           Data.Maybe           (fromJust)
+import           Data.Word
 
 data MessageType = RunCommand
                  | GetWorkspaces
@@ -18,7 +24,7 @@ data MessageType = RunCommand
                  | GetBindingState
                  | GetInputs
                  | GetSeats
-                 deriving (Show, Eq)
+                 deriving (Eq, Show)
 
 data EventType = Workspace
                | Mode
@@ -29,7 +35,7 @@ data EventType = Workspace
                | Tick
                | BarStateUpdate
                | Input
-               deriving (Show)
+               deriving (Eq, Show)
 
 msgCodes :: [(MessageType, Word32)]
 msgCodes =
@@ -67,6 +73,28 @@ data Message = Message MessageType ByteString
              | Event   EventType   ByteString
              deriving (Show)
 
-msgData :: Message -> ByteString
-msgData (Message _ bytes) = bytes
-msgData (Event   _ bytes) = bytes
+-- | Get the payload data of a Message.
+msgPayload :: Message -> ByteString
+msgPayload (Message _ bytes) = bytes
+msgPayload (Event   _ bytes) = bytes
+
+-- | Get the size in bytes of the message payload.
+msgLength :: Num a => Message -> a
+msgLength = fromIntegral . BL.length . msgPayload
+
+-- | Every IPC message is prefixed with the magic string "i3-ipc".
+magicString :: ByteString
+magicString = "i3-ipc"
+
+-- | Get the payload type code as a 32-bit integer.
+msgTypeCode :: Message -> Word32
+msgTypeCode (Message t _) = fromJust . lookup t $ msgCodes
+msgTypeCode (Event   t _) = fromJust . lookup t $ evtCodes
+
+-- | Serialize a message.
+putMessage :: Message -> Put
+putMessage msg = do
+  putLazyByteString magicString
+  putWord32host (msgLength msg)
+  putWord32host (msgTypeCode msg)
+  putLazyByteString (msgPayload msg)
