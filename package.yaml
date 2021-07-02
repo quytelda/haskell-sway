@@ -1,6 +1,6 @@
 name:                sway
 version:             0.1.0.0
-github:              "quytelda/sway"
+github:              "quytelda/haskell-sway"
 license:             BSD3
 author:              "Quytelda Kahja"
 maintainer:          "quytelda@tamalin.org"
