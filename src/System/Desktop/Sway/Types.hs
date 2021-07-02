@@ -2,10 +2,13 @@
 
 module System.Desktop.Sway.Types where
 
+import           Control.Applicative
+import           Control.Monad        (when)
 import           Data.Binary.Get
 import           Data.Binary.Put
 import           Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BL
+import           Data.List            (find)
 import           Data.Maybe           (fromJust)
 import           Data.Word
 
@@ -69,6 +72,9 @@ evtCodes =
   , (Input,           0x80000015)
   ]
 
+lookupRev :: (Foldable t, Eq a) => a -> t (b, a) -> Maybe b
+lookupRev c t = fst <$> find (\p -> c == snd p) t
+
 data Message = Message MessageType ByteString
              | Event   EventType   ByteString
              deriving (Show)
@@ -98,3 +104,28 @@ putMessage msg = do
   putWord32host (msgLength msg)
   putWord32host (msgTypeCode msg)
   putLazyByteString (msgPayload msg)
+
+getMagicString :: Get ()
+getMagicString = do
+  bytes <- getLazyByteString (BL.length magicString)
+  when (bytes /= magicString) $
+    fail "Expected magic string."
+
+buildMessage :: Word32 -> ByteString -> Maybe Message
+buildMessage code payload =
+  let msg = Message <$> lookupRev code msgCodes
+      evt = Event   <$> lookupRev code evtCodes
+  in (msg <|> evt) <*> pure payload
+
+getMessage :: Get Message
+getMessage = do
+  getMagicString
+  wSize <- getWord32host
+  wCode <- getWord32host
+  payload <- getPayload wSize
+
+  case buildMessage wCode payload of
+    Just msg -> return msg
+    Nothing  -> fail $ "Unknown message type code:" <> show wCode
+  where
+    getPayload = getLazyByteString . fromIntegral
