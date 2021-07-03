@@ -14,7 +14,9 @@ import qualified Data.ByteString.Lazy       as BL
 import           Data.List                  (find)
 import           Data.Maybe                 (fromJust)
 import           Data.Word
+import           Data.Int
 import           Network.Socket
+import qualified Network.Socket.ByteString.Lazy as SocketBL
 
 data MessageType = RunCommand
                  | GetWorkspaces
@@ -157,3 +159,11 @@ type Sway = SwayT Socket IO
 -- Returns either the computation result or an error message in the base monad.
 runSwayT :: SwayT s m a -> s -> m (Either String a)
 runSwayT = runReaderT . runExceptT
+
+class SendRecv a where
+  send :: a -> ByteString -> IO ()
+  recv :: a -> IO ByteString
+
+instance SendRecv Socket where
+  send = SocketBL.sendAll
+  recv = SocketBL.getContents
