@@ -167,3 +167,16 @@ class SendRecv a where
 instance SendRecv Socket where
   send = SocketBL.sendAll
   recv = SocketBL.getContents
+
+-- | Fetch the connection object within the monad.
+-- Since the connection object implements SendRecv, it can send or recv data.
+getConnection :: (MonadIO m, SendRecv s) => SwayT s m s
+getConnection = lift ask
+
+-- | Send bytes using the connection object within the monad.
+sendBytes :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
+sendBytes bytes = getConnection >>= liftIO . flip send bytes
+
+-- | Receive bytes using the connection object within the monad.
+recvBytes :: (MonadIO m, SendRecv s) => SwayT s m ByteString
+recvBytes = getConnection >>= liftIO . recv
