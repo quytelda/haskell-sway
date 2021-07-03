@@ -3,14 +3,18 @@
 module System.Desktop.Sway.Types where
 
 import           Control.Applicative
-import           Control.Monad        (when)
+import           Control.Monad              (when)
+import           Control.Monad.Trans        (lift, liftIO, MonadIO)
+import           Control.Monad.Trans.Except
+import           Control.Monad.Trans.Reader
 import           Data.Binary.Get
 import           Data.Binary.Put
-import           Data.ByteString.Lazy (ByteString)
-import qualified Data.ByteString.Lazy as BL
-import           Data.List            (find)
-import           Data.Maybe           (fromJust)
+import           Data.ByteString.Lazy       (ByteString)
+import qualified Data.ByteString.Lazy       as BL
+import           Data.List                  (find)
+import           Data.Maybe                 (fromJust)
 import           Data.Word
+import           Network.Socket
 
 data MessageType = RunCommand
                  | GetWorkspaces
@@ -143,3 +147,13 @@ msgDecode bytes =
   case runGetOrFail getMessage bytes of
     Left  (_, _, err) -> Left  err
     Right (_, _, msg) -> Right msg
+
+-- | The sway monad encapsulates a computation within the context of a
+-- sway IPC connection.
+type SwayT s m = ExceptT String (ReaderT s m)
+type Sway = SwayT Socket IO
+
+-- | Unwrap a computation in the sway monad.
+-- Returns either the computation result or an error message in the base monad.
+runSwayT :: SwayT s m a -> s -> m (Either String a)
+runSwayT = runReaderT . runExceptT
