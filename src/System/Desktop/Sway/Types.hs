@@ -105,27 +105,30 @@ putMessage msg = do
   putWord32host (msgTypeCode msg)
   putLazyByteString (msgPayload msg)
 
+-- | Consume the magic string that begins every IPC message.
+-- Fail if the consumed bytes do not match.
 getMagicString :: Get ()
 getMagicString = do
   bytes <- getLazyByteString (BL.length magicString)
   when (bytes /= magicString) $
     fail "Expected magic string."
 
-buildMessage :: Word32 -> ByteString -> Maybe Message
-buildMessage code payload =
+-- | Construct a message from a type code and a payload.
+-- Returns Nothing if the given type code is unrecognized.
+mkMessage :: Word32 -> ByteString -> Maybe Message
+mkMessage code payload =
   let msg = Message <$> lookupRev code msgCodes
       evt = Event   <$> lookupRev code evtCodes
   in (msg <|> evt) <*> pure payload
 
+-- | Deserialize a message.
 getMessage :: Get Message
 getMessage = do
   getMagicString
-  wSize <- getWord32host
-  wCode <- getWord32host
-  payload <- getPayload wSize
+  size <- getWord32host
+  code <- getWord32host
+  payload <- getLazyByteString (fromIntegral size)
 
-  case buildMessage wCode payload of
+  case mkMessage code payload of
     Just msg -> return msg
-    Nothing  -> fail $ "Unknown message type code:" <> show wCode
-  where
-    getPayload = getLazyByteString . fromIntegral
+    Nothing  -> fail $ "Unknown message type code:" <> show code
