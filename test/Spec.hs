@@ -19,7 +19,7 @@ main :: IO ()
 main = hspec $ do
   describe "Message" $ do
     it "can encode Messages to binary" $
-      runPut (putMessage commandExitMsg) `shouldBe` commandExitBin
+      msgEncode commandExitMsg `shouldBe` commandExitBin
 
     it "can decode Messages from binary" $
-      runGet getMessage commandExitBin `shouldBe` commandExitMsg
+      msgDecode commandExitBin `shouldBe` Right commandExitMsg

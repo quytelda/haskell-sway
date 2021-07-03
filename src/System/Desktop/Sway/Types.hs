@@ -132,3 +132,14 @@ getMessage = do
   case mkMessage code payload of
     Just msg -> return msg
     Nothing  -> fail $ "Unknown message type code:" <> show code
+
+-- | Encode a binary sway IPC protocol message.
+msgEncode :: Message -> ByteString
+msgEncode = runPut . putMessage
+
+-- | Decode a binary sway IPC protocol message.
+msgDecode :: ByteString -> Either String Message
+msgDecode bytes =
+  case runGetOrFail getMessage bytes of
+    Left  (_, _, err) -> Left  err
+    Right (_, _, msg) -> Right msg
