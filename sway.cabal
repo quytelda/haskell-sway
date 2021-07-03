@@ -49,5 +49,6 @@ test-suite sway-test
       base >=4.7 && <5
     , binary >=0.8
     , bytestring >=0.10
+    , hspec >=2.7 && <3
     , sway
   default-language: Haskell2010
