@@ -77,7 +77,7 @@ lookupRev c t = fst <$> find (\p -> c == snd p) t
 
 data Message = Message MessageType ByteString
              | Event   EventType   ByteString
-             deriving (Show)
+             deriving (Eq, Show)
 
 -- | Get the payload data of a Message.
 msgPayload :: Message -> ByteString
