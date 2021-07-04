@@ -2,7 +2,9 @@
 
 import           Data.Binary.Get
 import           Data.Binary.Put
+import           Data.ByteString.Lazy      (ByteString)
 import qualified Data.ByteString.Lazy      as BL
+import           Data.IORef
 import           Test.Hspec
 
 import           System.Desktop.Sway.Types
@@ -15,6 +17,13 @@ commandExitBin = BL.pack [ 0x69, 0x33, 0x2d, 0x69
                          , 0x69, 0x74
                          ]
 
+-- | Mocket is a mock socket for testing IPC socket operations.
+newtype Mocket = Mocket (IORef ByteString)
+
+instance SendRecv Mocket where
+  recv (Mocket m) = readIORef m
+  send (Mocket m) = writeIORef m
+
 main :: IO ()
 main = hspec $ do
   describe "Message" $ do
@@ -23,3 +32,13 @@ main = hspec $ do
 
     it "can decode Messages from binary" $
       msgDecode commandExitBin `shouldBe` Right commandExitMsg
+
+  describe "SwayT" $ do
+    it "can send raw bytes" $ do
+      ref <- newIORef ""
+      runSwayT (sendBytes commandExitBin) (Mocket ref)
+      readIORef ref `shouldReturn` commandExitBin
+
+    it "can receive raw bytes" $ do
+      ref <- newIORef commandExitBin
+      runSwayT recvBytes (Mocket ref) `shouldReturn` Right commandExitBin
