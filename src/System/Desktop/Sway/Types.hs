@@ -180,3 +180,16 @@ sendBytes bytes = getConnection >>= liftIO . flip send bytes
 -- | Receive bytes using the connection object within the monad.
 recvBytes :: (MonadIO m, SendRecv s) => SwayT s m ByteString
 recvBytes = getConnection >>= liftIO . recv
+
+-- | Send a Message using the connection object within the monad.
+sendMessage :: (MonadIO m, SendRecv s) => Message -> SwayT s m ()
+sendMessage = sendBytes . msgEncode
+
+-- | Receive a Message using the connection object within the monad.
+-- Throws an exception if the received message cannot be parsed.
+recvMessage :: (MonadIO m, SendRecv s) => SwayT s m Message
+recvMessage = do
+  bytes <- recvBytes
+  case msgDecode bytes of
+    Left  err -> throwE err
+    Right msg -> return msg
