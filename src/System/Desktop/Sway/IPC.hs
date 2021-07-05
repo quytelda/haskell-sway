@@ -10,8 +10,8 @@ import           System.Environment (lookupEnv)
 import           System.Desktop.Sway.Types
 
 -- | Find the path to the sway socket file.
-getSocketAddr :: IO (Maybe SockAddr)
-getSocketAddr = liftM SockAddrUnix <$> lookupEnv "SWAYSOCK"
+getSocketPath :: IO (Maybe FilePath)
+getSocketPath = lookupEnv "SWAYSOCK"
 
 -- | Connect to a UNIX domain socket at the given file path.
 -- The socket must exist.
