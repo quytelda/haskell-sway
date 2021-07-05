@@ -3,18 +3,17 @@
 module System.Desktop.Sway.Types where
 
 import           Control.Applicative
-import           Control.Monad              (when)
-import           Control.Monad.Trans        (lift, liftIO, MonadIO)
+import           Control.Monad                  (when)
+import           Control.Monad.Trans            (MonadIO, lift, liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
 import           Data.Binary.Get
 import           Data.Binary.Put
-import           Data.ByteString.Lazy       (ByteString)
-import qualified Data.ByteString.Lazy       as BL
-import           Data.List                  (find)
-import           Data.Maybe                 (fromJust)
+import           Data.ByteString.Lazy           (ByteString)
+import qualified Data.ByteString.Lazy           as BL
+import           Data.List                      (find)
+import           Data.Maybe                     (fromJust)
 import           Data.Word
-import           Data.Int
 import           Network.Socket
 import qualified Network.Socket.ByteString.Lazy as SocketBL
 

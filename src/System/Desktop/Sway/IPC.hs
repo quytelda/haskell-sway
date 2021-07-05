@@ -3,11 +3,8 @@
 module System.Desktop.Sway.IPC where
 
 import           Control.Exception  (bracket)
-import           Control.Monad
 import           Network.Socket
 import           System.Environment (lookupEnv)
-
-import           System.Desktop.Sway.Types
 
 -- | Find the path to the sway socket file.
 getSocketPath :: IO (Maybe FilePath)
