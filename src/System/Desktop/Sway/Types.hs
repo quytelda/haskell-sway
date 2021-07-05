@@ -193,3 +193,7 @@ recvMessage = do
   case msgDecode bytes of
     Left  err -> throwE err
     Right msg -> return msg
+
+-- | Send an IPC message and receive the reply.
+ipc :: (MonadIO m, SendRecv s) => Message -> SwayT s m Message
+ipc msg = sendMessage msg >> recvMessage
