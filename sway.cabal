@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      System.Desktop.Sway.Command
       System.Desktop.Sway.IPC
       System.Desktop.Sway.Types
   other-modules:
