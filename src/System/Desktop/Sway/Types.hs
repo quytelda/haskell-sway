@@ -210,8 +210,8 @@ False ? _ = mempty
 parseFailure :: Object -> Parser String
 parseFailure obj = do
   parseError <- obj .: "parse_error" :: Parser Bool
-  error      <- obj .: "error" :: Parser String
-  return $ (parseError ? "parse error: ") <> error
+  errorMsg   <- obj .: "error" :: Parser String
+  return $ (parseError ? "parse error: ") <> errorMsg
 
 -- | Parse a sway command result JSON object.
 -- For success results, return `()`.
