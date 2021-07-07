@@ -20,6 +20,7 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/quytelda/sway#readme>
 
 dependencies:
+- aeson >= 1.5 && < 2
 - base >= 4.7 && < 5
 - binary >= 0.8
 - bytestring >= 0.10

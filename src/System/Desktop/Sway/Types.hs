@@ -3,10 +3,12 @@
 module System.Desktop.Sway.Types where
 
 import           Control.Applicative
-import           Control.Monad                  (when)
+import           Control.Monad                  (join, when)
 import           Control.Monad.Trans            (MonadIO, lift, liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
+import           Data.Aeson
+import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Binary.Get
 import           Data.Binary.Put
 import           Data.ByteString.Lazy           (ByteString)
@@ -196,3 +198,26 @@ recvMessage = do
 -- | Send an IPC message and receive the reply.
 ipc :: (MonadIO m, SendRecv s) => Message -> SwayT s m Message
 ipc msg = sendMessage msg >> recvMessage
+
+-- | Conditionally provide a monoidal value.
+-- E.g. `(p ? x)` evaluates to `x` when `p` is true, but `mempty` otherwise.
+-- Useful for conditional concatenation: `str <> (p ? "optional")`.
+(?) :: Monoid p => Bool -> p -> p
+True  ? m = m
+False ? _ = mempty
+
+parseFailure :: Object -> Parser String
+parseFailure obj = do
+  parseError <- obj .: "parse_error" :: Parser Bool
+  error   <- obj .: "error" :: Parser String
+  return $ (parseError ? "parse error: ") <> error
+
+parseResult :: Object -> Parser (Either String ())
+parseResult obj = do
+  success <- obj .: "success"
+  if success
+    then Right <$> return ()
+    else Left  <$> parseFailure obj
+
+parseResults :: ByteString -> Either String [()]
+parseResults bytes = eitherDecode bytes >>= mapM (join . parseEither (withObject "command result" parseResult))
