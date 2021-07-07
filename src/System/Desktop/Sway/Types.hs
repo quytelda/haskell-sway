@@ -219,6 +219,6 @@ parseSuccess = withObject "command result" $ \obj -> do
     fail =<< parseFailure obj
 
 parseResults :: ByteString -> Either String ()
-parseResults bytes = do
-  values <- eitherDecode bytes :: Either String [Value]
-  mapM_ (parseEither parseSuccess) values
+parseResults bytes = eitherDecode bytes >>= parseEither (overArray parseSuccess)
+  where
+    overArray = withArray "list of results" . mapM_
