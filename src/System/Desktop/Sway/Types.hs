@@ -206,18 +206,24 @@ ipc msg = sendMessage msg >> recvMessage
 True  ? m = m
 False ? _ = mempty
 
+-- | Parse an error message from a sway command failure result JSON object.
 parseFailure :: Object -> Parser String
 parseFailure obj = do
   parseError <- obj .: "parse_error" :: Parser Bool
   error      <- obj .: "error" :: Parser String
   return $ (parseError ? "parse error: ") <> error
 
+-- | Parse a sway command result JSON object.
+-- For success results, return `()`.
+-- For failure results, parse error information and fail appropriately.
 parseSuccess :: Value -> Parser ()
 parseSuccess = withObject "command result" $ \obj -> do
   success <- obj .: "success"
   unless success $
     fail =<< parseFailure obj
 
+-- | Parse a `RUN_COMMAND` reply payload, which is an array of objects
+-- indicating the respective success or failure of each command sent.
 parseResults :: ByteString -> Either String ()
 parseResults bytes = eitherDecode bytes >>= parseEither (overArray parseSuccess)
   where
