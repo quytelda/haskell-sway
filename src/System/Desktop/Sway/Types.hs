@@ -3,7 +3,7 @@
 module System.Desktop.Sway.Types where
 
 import           Control.Applicative
-import           Control.Monad                  (join, when)
+import           Control.Monad
 import           Control.Monad.Trans            (MonadIO, lift, liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
@@ -209,15 +209,16 @@ False ? _ = mempty
 parseFailure :: Object -> Parser String
 parseFailure obj = do
   parseError <- obj .: "parse_error" :: Parser Bool
-  error   <- obj .: "error" :: Parser String
+  error      <- obj .: "error" :: Parser String
   return $ (parseError ? "parse error: ") <> error
 
-parseResult :: Object -> Parser (Either String ())
-parseResult obj = do
+parseSuccess :: Value -> Parser ()
+parseSuccess = withObject "command result" $ \obj -> do
   success <- obj .: "success"
-  if success
-    then Right <$> return ()
-    else Left  <$> parseFailure obj
+  unless success $
+    fail =<< parseFailure obj
 
-parseResults :: ByteString -> Either String [()]
-parseResults bytes = eitherDecode bytes >>= mapM (join . parseEither (withObject "command result" parseResult))
+parseResults :: ByteString -> Either String ()
+parseResults bytes = do
+  values <- eitherDecode bytes :: Either String [Value]
+  mapM_ (parseEither parseSuccess) values
