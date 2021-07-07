@@ -228,3 +228,12 @@ parseResults :: ByteString -> Either String ()
 parseResults bytes = eitherDecode bytes >>= parseEither (overArray parseSuccess)
   where
     overArray = withArray "list of results" . mapM_
+
+-- | Run a sway command.
+-- Send a RUN_COMMAND IPC message and return the reply payload.
+runCommand :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
+runCommand cmd = do
+  reply <- ipc $ Message RunCommand cmd
+  case reply of
+    Message RunCommand payload -> except $ parseResults payload
+    _                          -> throwE "expected RUN_COMMAND reply"
