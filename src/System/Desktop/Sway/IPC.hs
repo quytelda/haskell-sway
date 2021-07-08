@@ -5,7 +5,8 @@ module System.Desktop.Sway.IPC where
 
 import           Control.Exception          (bracket)
 import           Control.Monad.Trans        (MonadIO, liftIO)
-import           Control.Monad.Trans.Except (throwE)
+import           Control.Monad.Trans.Except (except, throwE)
+import           Data.Aeson                 (eitherDecode, FromJSON)
 import           Data.ByteString.Lazy       (ByteString)
 import           Network.Socket
 import           System.Environment         (lookupEnv)
@@ -64,3 +65,14 @@ recvMessage = do
 -- | Send an IPC message and receive the reply.
 ipc :: (MonadIO m, SendRecv s) => Message -> SwayT s m Message
 ipc msg = sendMessage msg >> recvMessage
+
+-- | Send a sway IPC message, receive the reply, and parse it's payload.
+-- Construct the outgoing IPC message with the given type and payload.
+-- Fail if the outgoing and incoming types don't match.
+query :: (FromJSON a, MonadIO m, SendRecv s) => MessageType -> ByteString -> SwayT s m a
+query type1 bytes = do
+  reply <- ipc $ Message type1 bytes
+  case reply of
+    Message type2 payload
+      | type1 == type2 -> except $ eitherDecode payload
+    _                  -> throwE $ "expected " <> show type1 <> " reply"
