@@ -1,14 +1,14 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module System.Desktop.Sway.Types where
 
 import           Control.Applicative
 import           Control.Monad
-import           Control.Monad.Trans            (MonadIO, lift, liftIO)
+import           Control.Monad.Trans            (MonadIO, lift)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
 import           Data.Aeson
-import           Data.Aeson.Types (Parser, parseEither)
 import           Data.Binary.Get
 import           Data.Binary.Put
 import           Data.ByteString.Lazy           (ByteString)
@@ -36,15 +36,15 @@ data MessageType = RunCommand
                  | GetSeats
                  deriving (Eq, Show)
 
-data EventType = Workspace
-               | Mode
-               | Window
-               | BarConfigUpdate
-               | Binding
-               | Shutdown
-               | Tick
-               | BarStateUpdate
-               | Input
+data EventType = WorkspaceEvent
+               | ModeEvent
+               | WindowEvent
+               | BarConfigUpdateEvent
+               | BindingEvent
+               | ShutdownEvent
+               | TickEvent
+               | BarStateUpdateEvent
+               | InputEvent
                deriving (Eq, Show)
 
 msgCodes :: [(MessageType, Word32)]
@@ -68,15 +68,15 @@ msgCodes =
 
 evtCodes :: [(EventType, Word32)]
 evtCodes =
-  [ (Workspace,       0x80000000)
-  , (Mode,            0x80000002)
-  , (Window,          0x80000003)
-  , (BarConfigUpdate, 0x80000004)
-  , (Binding,         0x80000005)
-  , (Shutdown,        0x80000006)
-  , (Tick,            0x80000007)
-  , (BarStateUpdate,  0x80000014)
-  , (Input,           0x80000015)
+  [ (WorkspaceEvent,       0x80000000)
+  , (ModeEvent,            0x80000002)
+  , (WindowEvent,          0x80000003)
+  , (BarConfigUpdateEvent, 0x80000004)
+  , (BindingEvent,         0x80000005)
+  , (ShutdownEvent,        0x80000006)
+  , (TickEvent,            0x80000007)
+  , (BarStateUpdateEvent,  0x80000014)
+  , (InputEvent,           0x80000015)
   ]
 
 lookupRev :: (Foldable t, Eq a) => a -> t (b, a) -> Maybe b
@@ -174,31 +174,6 @@ instance SendRecv Socket where
 getConnection :: (MonadIO m, SendRecv s) => SwayT s m s
 getConnection = lift ask
 
--- | Send bytes using the connection object within the monad.
-sendBytes :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
-sendBytes bytes = getConnection >>= liftIO . flip send bytes
-
--- | Receive bytes using the connection object within the monad.
-recvBytes :: (MonadIO m, SendRecv s) => SwayT s m ByteString
-recvBytes = getConnection >>= liftIO . recv
-
--- | Send a Message using the connection object within the monad.
-sendMessage :: (MonadIO m, SendRecv s) => Message -> SwayT s m ()
-sendMessage = sendBytes . msgEncode
-
--- | Receive a Message using the connection object within the monad.
--- Throws an exception if the received message cannot be parsed.
-recvMessage :: (MonadIO m, SendRecv s) => SwayT s m Message
-recvMessage = do
-  bytes <- recvBytes
-  case msgDecode bytes of
-    Left  err -> throwE err
-    Right msg -> return msg
-
--- | Send an IPC message and receive the reply.
-ipc :: (MonadIO m, SendRecv s) => Message -> SwayT s m Message
-ipc msg = sendMessage msg >> recvMessage
-
 -- | Conditionally provide a monoidal value.
 -- E.g. `(p ? x)` evaluates to `x` when `p` is true, but `mempty` otherwise.
 -- Useful for conditional concatenation: `str <> (p ? "optional")`.
@@ -206,25 +181,86 @@ ipc msg = sendMessage msg >> recvMessage
 True  ? m = m
 False ? _ = mempty
 
--- | Parse an error message from a sway command failure result JSON object.
-parseFailure :: Object -> Parser String
-parseFailure obj = do
-  parseError <- obj .: "parse_error" :: Parser Bool
-  error      <- obj .: "error" :: Parser String
-  return $ (parseError ? "parse error: ") <> error
+data Rectangle = Rectangle { rectX      :: Int
+                           , rectY      :: Int
+                           , rectWidth  :: Int
+                           , rectHeight :: Int
+                           } deriving (Show)
 
--- | Parse a sway command result JSON object.
--- For success results, return `()`.
--- For failure results, parse error information and fail appropriately.
-parseSuccess :: Value -> Parser ()
-parseSuccess = withObject "command result" $ \obj -> do
-  success <- obj .: "success"
-  unless success $
-    fail =<< parseFailure obj
+instance FromJSON Rectangle where
+  parseJSON = withObject "Rectangle" $ \obj -> do
+    rectX      <- obj .: "x"
+    rectY      <- obj .: "y"
+    rectWidth  <- obj .: "width"
+    rectHeight <- obj .: "height"
 
--- | Parse a `RUN_COMMAND` reply payload, which is an array of objects
--- indicating the respective success or failure of each command sent.
-parseResults :: ByteString -> Either String ()
-parseResults bytes = eitherDecode bytes >>= parseEither (overArray parseSuccess)
-  where
-    overArray = withArray "list of results" . mapM_
+    return Rectangle{..}
+
+data Workspace = Workspace { wsNum     :: Int
+                           , wsName    :: String
+                           , wsVisible :: Bool
+                           , wsFocused :: Bool
+                           , wsUrgent  :: Bool
+                           , wsRect    :: Rectangle
+                           , wsOutput  :: String
+                           } deriving (Show)
+
+instance FromJSON Workspace where
+  parseJSON = withObject "Workspace" $ \obj -> do
+    wsNum     <- obj .: "num"
+    wsName    <- obj .: "name"
+    wsVisible <- obj .: "visible"
+    wsFocused <- obj .: "focused"
+    wsUrgent  <- obj .: "urgent"
+    wsRect    <- obj .: "rect"
+    wsOutput  <- obj .: "output"
+
+    return Workspace{..}
+
+data OutputMode = OutputMode { modeWidth   :: Int
+                             , modeHeight  :: Int
+                             , modeRefresh :: Int
+                             } deriving (Show)
+
+instance FromJSON OutputMode where
+  parseJSON = withObject "OutputMode" $ \obj -> do
+    modeWidth   <- obj .: "width"
+    modeHeight  <- obj .: "height"
+    modeRefresh <- obj .: "refresh"
+
+    return OutputMode{..}
+
+data Output = Output { outputName             ::  String
+                     , outputMake             ::  String
+                     , outputModel            ::  String
+                     , outputSerial           ::  String
+                     , outputActive           ::  Bool
+                     , outputDPMS             ::  Bool
+                     , outputPrimary          ::  Bool
+                     , outputScale            ::  Double
+                     , outputSubpixelHinting  ::  String
+                     , outputTransform        ::  String
+                     , outputCurrentWorkspace ::  String
+                     , outputModes            ::  [OutputMode]
+                     , outputCurrentMode      ::  OutputMode
+                     , outputRect             ::  Rectangle
+                     } deriving (Show)
+
+instance FromJSON Output where
+  parseJSON = withObject "Output" $ \obj -> do
+    outputName             <- obj .: "name"
+    outputMake             <- obj .: "make"
+    outputModel            <- obj .: "model"
+    outputSerial           <- obj .: "serial"
+    outputActive           <- obj .: "active"
+    outputDPMS             <- obj .: "dpms"
+    outputPrimary          <- obj .: "primary"
+    outputScale            <- obj .: "scale"
+    outputSubpixelHinting  <- obj .: "subpixel_hinting"
+    outputTransform        <- obj .: "transform"
+    outputCurrentWorkspace <- obj .: "current_workspace"
+    outputModes            <- obj .: "modes"
+    outputCurrentMode      <- obj .: "current_mode"
+    outputRect             <- obj .: "rect"
+
+    return Output{..}
