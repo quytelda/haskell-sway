@@ -264,3 +264,48 @@ instance FromJSON Output where
     outputRect             <- obj .: "rect"
 
     return Output{..}
+
+data Node = Node { nodeID                 :: Int
+                 , nodeName               :: Maybe String
+                 , nodeType               :: String
+                 , nodeBorder             :: String
+                 , nodeCurrentBorderWidth :: Int
+                 , nodeLayout             :: String
+                 , nodeOrientation        :: String
+                 , nodePercent            :: Double
+                 , nodeRect               :: Rectangle
+                 , nodeWindowRect         :: Rectangle
+                 , nodeDecoRect           :: Rectangle
+                 , nodeGeometry           :: Rectangle
+                 , nodeUrgent             :: Bool
+                 , nodeSticky             :: Bool
+                 , nodeMarks              :: [String]
+                 , nodeFocused            :: Bool
+                 , nodeFocus              :: [Int]
+                 , nodeNodes              :: [Node]
+                 , nodeFloatingNodes      :: [Node]
+                 } deriving (Show)
+
+instance FromJSON Node where
+  parseJSON = withObject "Node" $ \obj -> do
+    nodeID                 <- obj .: "id"
+    nodeName               <- obj .: "name"
+    nodeType               <- obj .: "type"
+    nodeBorder             <- obj .: "border"
+    nodeCurrentBorderWidth <- obj .: "current_border_width"
+    nodeLayout             <- obj .: "layout"
+    nodeOrientation        <- obj .: "orientation"
+    nodePercent            <- obj .: "percent"
+    nodeRect               <- obj .: "rect"
+    nodeWindowRect         <- obj .: "window_rect"
+    nodeDecoRect           <- obj .: "deco_rect"
+    nodeGeometry           <- obj .: "geometry"
+    nodeUrgent             <- obj .: "urgent"
+    nodeSticky             <- obj .: "sticky"
+    nodeMarks              <- obj .: "marks"
+    nodeFocused            <- obj .: "focused"
+    nodeFocus              <- obj .: "focus"
+    nodeNodes              <- obj .: "nodes"
+    nodeFloatingNodes      <- obj .: "floating_nodes"
+
+    return Node{..}
