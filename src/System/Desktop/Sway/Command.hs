@@ -10,6 +10,7 @@ import           Data.Aeson.Types           (Parser, parseEither)
 import           Data.ByteString.Lazy       (ByteString)
 
 import           System.Desktop.Sway.Types
+import           System.Desktop.Sway.IPC
 
 -- | Parse an error message from a sway command failure result JSON object.
 parseFailure :: Object -> Parser String

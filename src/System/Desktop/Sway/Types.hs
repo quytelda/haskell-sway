@@ -5,7 +5,7 @@ module System.Desktop.Sway.Types where
 
 import           Control.Applicative
 import           Control.Monad
-import           Control.Monad.Trans            (MonadIO, lift, liftIO)
+import           Control.Monad.Trans            (MonadIO, lift)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
 import           Data.Aeson
@@ -173,31 +173,6 @@ instance SendRecv Socket where
 -- Since the connection object implements SendRecv, it can send or recv data.
 getConnection :: (MonadIO m, SendRecv s) => SwayT s m s
 getConnection = lift ask
-
--- | Send bytes using the connection object within the monad.
-sendBytes :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
-sendBytes bytes = getConnection >>= liftIO . flip send bytes
-
--- | Receive bytes using the connection object within the monad.
-recvBytes :: (MonadIO m, SendRecv s) => SwayT s m ByteString
-recvBytes = getConnection >>= liftIO . recv
-
--- | Send a Message using the connection object within the monad.
-sendMessage :: (MonadIO m, SendRecv s) => Message -> SwayT s m ()
-sendMessage = sendBytes . msgEncode
-
--- | Receive a Message using the connection object within the monad.
--- Throws an exception if the received message cannot be parsed.
-recvMessage :: (MonadIO m, SendRecv s) => SwayT s m Message
-recvMessage = do
-  bytes <- recvBytes
-  case msgDecode bytes of
-    Left  err -> throwE err
-    Right msg -> return msg
-
--- | Send an IPC message and receive the reply.
-ipc :: (MonadIO m, SendRecv s) => Message -> SwayT s m Message
-ipc msg = sendMessage msg >> recvMessage
 
 -- | Conditionally provide a monoidal value.
 -- E.g. `(p ? x)` evaluates to `x` when `p` is true, but `mempty` otherwise.

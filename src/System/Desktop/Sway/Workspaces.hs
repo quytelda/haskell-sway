@@ -7,6 +7,7 @@ import           Control.Monad.Trans.Except (except, throwE)
 import           Data.Aeson                 (eitherDecode)
 
 import           System.Desktop.Sway.Types
+import           System.Desktop.Sway.IPC
 
 -- | Get the list of sway workspaces.
 -- Send a `GET_WORKSPACES` IPC message and return the parsed results.
