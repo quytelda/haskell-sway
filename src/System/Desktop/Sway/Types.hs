@@ -34,15 +34,15 @@ data MessageType = RunCommand
                  | GetSeats
                  deriving (Eq, Show)
 
-data EventType = Workspace
-               | Mode
-               | Window
-               | BarConfigUpdate
-               | Binding
-               | Shutdown
-               | Tick
-               | BarStateUpdate
-               | Input
+data EventType = WorkspaceEvent
+               | ModeEvent
+               | WindowEvent
+               | BarConfigUpdateEvent
+               | BindingEvent
+               | ShutdownEvent
+               | TickEvent
+               | BarStateUpdateEvent
+               | InputEvent
                deriving (Eq, Show)
 
 msgCodes :: [(MessageType, Word32)]
@@ -66,15 +66,15 @@ msgCodes =
 
 evtCodes :: [(EventType, Word32)]
 evtCodes =
-  [ (Workspace,       0x80000000)
-  , (Mode,            0x80000002)
-  , (Window,          0x80000003)
-  , (BarConfigUpdate, 0x80000004)
-  , (Binding,         0x80000005)
-  , (Shutdown,        0x80000006)
-  , (Tick,            0x80000007)
-  , (BarStateUpdate,  0x80000014)
-  , (Input,           0x80000015)
+  [ (WorkspaceEvent,       0x80000000)
+  , (ModeEvent,            0x80000002)
+  , (WindowEvent,          0x80000003)
+  , (BarConfigUpdateEvent, 0x80000004)
+  , (BindingEvent,         0x80000005)
+  , (ShutdownEvent,        0x80000006)
+  , (TickEvent,            0x80000007)
+  , (BarStateUpdateEvent,  0x80000014)
+  , (InputEvent,           0x80000015)
   ]
 
 lookupRev :: (Foldable t, Eq a) => a -> t (b, a) -> Maybe b
