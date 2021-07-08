@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module System.Desktop.Sway.Types where
@@ -7,6 +8,7 @@ import           Control.Monad
 import           Control.Monad.Trans            (MonadIO, lift, liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
+import           Data.Aeson
 import           Data.Binary.Get
 import           Data.Binary.Put
 import           Data.ByteString.Lazy           (ByteString)
@@ -203,3 +205,39 @@ ipc msg = sendMessage msg >> recvMessage
 (?) :: Monoid p => Bool -> p -> p
 True  ? m = m
 False ? _ = mempty
+
+data Rectangle = Rectangle { rectX      :: Int
+                           , rectY      :: Int
+                           , rectWidth  :: Int
+                           , rectHeight :: Int
+                           } deriving (Show)
+
+instance FromJSON Rectangle where
+  parseJSON = withObject "Rectangle" $ \obj -> do
+    rectX      <- obj .: "x"
+    rectY      <- obj .: "y"
+    rectWidth  <- obj .: "width"
+    rectHeight <- obj .: "height"
+
+    return Rectangle{..}
+
+data Workspace = Workspace { wsNum     :: Int
+                           , wsName    :: String
+                           , wsVisible :: Bool
+                           , wsFocused :: Bool
+                           , wsUrgent  :: Bool
+                           , wsRect    :: Rectangle
+                           , wsOutput  :: String
+                           } deriving (Show)
+
+instance FromJSON Workspace where
+  parseJSON = withObject "Workspace" $ \obj -> do
+    wsNum     <- obj .: "num"
+    wsName    <- obj .: "name"
+    wsVisible <- obj .: "visible"
+    wsFocused <- obj .: "focused"
+    wsUrgent  <- obj .: "urgent"
+    wsRect    <- obj .: "rect"
+    wsOutput  <- obj .: "output"
+
+    return Workspace{..}
