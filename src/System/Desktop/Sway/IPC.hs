@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module System.Desktop.Sway.IPC where
@@ -10,7 +11,6 @@ import           Network.Socket
 import           System.Environment         (lookupEnv)
 
 import           System.Desktop.Sway.Types
-
 
 -- | Find the path to the sway socket file.
 getSocketPath :: IO (Maybe FilePath)
@@ -32,6 +32,13 @@ closeUnixSocket = close'
 -- | Execute an action that makes use of a UNIX socket at the given path.
 withUnixSocket :: FilePath -> (Socket -> IO a) -> IO a
 withUnixSocket path = bracket (openUnixSocket path) closeUnixSocket
+
+-- | Execute an action that uses the system sway socket.
+-- Fails if the sway socket cannot be located.
+withSwaySocket :: (Socket -> IO a) -> IO a
+withSwaySocket f = getSocketPath >>= \case
+  Just path -> withUnixSocket path f
+  Nothing   -> fail "Unable to get sway socket path."
 
 -- | Send bytes using the connection object within the monad.
 sendBytes :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
