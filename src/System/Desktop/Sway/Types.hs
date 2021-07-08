@@ -241,3 +241,12 @@ instance FromJSON Workspace where
     wsOutput  <- obj .: "output"
 
     return Workspace{..}
+
+-- | Get the list of sway workspaces.
+-- Send a `GET_WORKSPACES` IPC message and return the parsed results.
+getWorkspaces :: (MonadIO m, SendRecv s) => SwayT s m [Workspace]
+getWorkspaces = do
+  reply <- ipc $ Message GetWorkspaces ""
+  case reply of
+    Message GetWorkspaces payload -> except $ eitherDecode payload
+    _                             -> throwE "expected GET_WORKSPACES reply"
