@@ -35,7 +35,7 @@ spec = describe "Command" $ do
   describe "parseResults" $ do
     context "when provided valid input" $ do
       it "should succeed when all commands succeeded" $
-        parseResults reply_RunCommand_success `shouldBe` Right ()
+        decodeResults reply_RunCommand_success `shouldBe` Right ()
 
       it "returns an error message if any command failed" $
-        parseResults reply_RunCommand_failure `shouldSatisfy` isLeft
+        decodeResults reply_RunCommand_failure `shouldSatisfy` isLeft
