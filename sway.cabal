@@ -48,6 +48,8 @@ test-suite sway-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      System.Desktop.Sway.CommandSpec
+      System.Desktop.Sway.TypesSpec
       Paths_sway
   hs-source-dirs:
       test

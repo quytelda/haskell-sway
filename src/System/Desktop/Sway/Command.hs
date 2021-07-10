@@ -20,20 +20,23 @@ parseFailure obj = do
   return $ (parseError ? "parse error: ") <> errorMsg
 
 -- | Parse a sway command result JSON object.
--- For success results, return `()`.
--- For failure results, parse error information and fail appropriately.
-parseSuccess :: Value -> Parser ()
-parseSuccess = withObject "command result" $ \obj -> do
+-- For success results, return unit.
+-- For failure results, return an error message.
+parseResult :: Value -> Parser (Either String ())
+parseResult = withObject "command result" $ \obj -> do
   success <- obj .: "success"
-  unless success $
-    fail =<< parseFailure obj
+  if success
+    then Right <$> return ()
+    else Left  <$> parseFailure obj
 
 -- | Parse a `RUN_COMMAND` reply payload, which is an array of objects
 -- indicating the respective success or failure of each command sent.
-parseResults :: ByteString -> Either String ()
-parseResults bytes = eitherDecode bytes >>= parseEither (overArray parseSuccess)
+decodeResults :: ByteString -> Either String ()
+decodeResults bytes = eitherDecode bytes
+            >>= parseEither (mapArray parseResult)
+            >>= sequence_
   where
-    overArray = withArray "list of results" . mapM_
+    mapArray = withArray "Array" . mapM
 
 -- | Run a sway command.
 -- Send a RUN_COMMAND IPC message and return the reply payload.
@@ -41,6 +44,6 @@ runCommand :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
 runCommand cmd = do
   reply <- ipc $ Message RunCommand cmd
   case reply of
-    Message RunCommand payload -> except $ parseResults payload
+    Message RunCommand payload -> except $ decodeResults payload
     _                          -> throwE "expected RUN_COMMAND reply"
 
