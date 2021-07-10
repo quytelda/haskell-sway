@@ -9,6 +9,7 @@ import           Control.Monad.Trans            (MonadIO, lift)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
 import           Data.Aeson
+import           Data.Aeson.Types               (Parser)
 import           Data.Binary.Get
 import           Data.Binary.Put
 import           Data.ByteString.Lazy           (ByteString)
@@ -265,9 +266,24 @@ instance FromJSON Output where
 
     return Output{..}
 
+data NodeType = RootNode
+              | OutputNode
+              | WorkspaceNode
+              | ContainerNode
+              | FloatingNode
+              deriving (Show)
+
+parseNodeType :: String -> Parser NodeType
+parseNodeType "root"         = return RootNode
+parseNodeType "output"       = return OutputNode
+parseNodeType "workspace"    = return WorkspaceNode
+parseNodeType "con"          = return ContainerNode
+parseNodeType "floating_con" = return FloatingNode
+parseNodeType _              = fail "invalid node type"
+
 data Node = Node { nodeID                 :: Int
                  , nodeName               :: Maybe String
-                 , nodeType               :: String
+                 , nodeType               :: NodeType
                  , nodeBorder             :: String
                  , nodeCurrentBorderWidth :: Int
                  , nodeLayout             :: String
@@ -290,7 +306,7 @@ instance FromJSON Node where
   parseJSON = withObject "Node" $ \obj -> do
     nodeID                 <- obj .: "id"
     nodeName               <- obj .: "name"
-    nodeType               <- obj .: "type"
+    nodeType               <- obj .: "type" >>= parseNodeType
     nodeBorder             <- obj .: "border"
     nodeCurrentBorderWidth <- obj .: "current_border_width"
     nodeLayout             <- obj .: "layout"
