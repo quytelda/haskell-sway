@@ -1,5 +1,5 @@
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 module System.Desktop.Sway.Types where
 
@@ -46,7 +46,18 @@ data EventType = WorkspaceEvent
                | TickEvent
                | BarStateUpdateEvent
                | InputEvent
-               deriving (Eq, Show)
+               deriving (Eq)
+
+instance Show EventType where
+  show WorkspaceEvent       = "workspace"
+  show ModeEvent            = "mode"
+  show WindowEvent          = "window"
+  show BarConfigUpdateEvent = "barconfig_update"
+  show BindingEvent         = "binding"
+  show ShutdownEvent        = "shutdown"
+  show TickEvent            = "tick"
+  show BarStateUpdateEvent  = "bar_state_update"
+  show InputEvent           = "input"
 
 msgCodes :: [(MessageType, Word32)]
 msgCodes =

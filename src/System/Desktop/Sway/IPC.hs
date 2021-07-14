@@ -1,13 +1,16 @@
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module System.Desktop.Sway.IPC where
 
 import           Control.Exception          (bracket)
+import           Control.Monad
 import           Control.Monad.Trans        (MonadIO, liftIO)
 import           Control.Monad.Trans.Except (except, throwE)
-import           Data.Aeson                 (eitherDecode, FromJSON)
+import           Data.Aeson
+import           Data.Aeson.Types           (parseEither)
 import           Data.ByteString.Lazy       (ByteString)
+import           Data.Vector                (toList)
 import           Network.Socket
 import           System.Environment         (lookupEnv)
 
@@ -76,3 +79,25 @@ query type1 bytes = do
     Message type2 payload
       | type1 == type2 -> except $ eitherDecode payload
     _                  -> throwE $ "expected " <> show type1 <> " reply"
+
+-- | Parse a list of results.
+parseResults :: ByteString -> Either String [Bool]
+parseResults bytes = eitherDecode bytes >>= parseEither results
+  where
+    success = withObject "success" (.: "success")
+    results = withArray "results" (mapM success . toList)
+
+-- | Subscribe to IPC events.
+-- Request to receive any events of the given types from sway.
+-- Throw an exception if subscribing fails for any of the requested event types.
+subscribe :: (MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
+subscribe events = do
+  reply <- ipc $ Message Subscribe $ encode $ map show events
+  case reply of
+    Message Subscribe payload -> do
+      fs <- except $ failures <$> parseResults payload
+      unless (null fs) $
+        throwE $ "Couldn't subscribe to: " <> show fs
+    _                         -> throwE "expected SUBSCRIBE reply"
+  where
+    failures = map fst . filter snd . zip events

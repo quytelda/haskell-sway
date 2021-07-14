@@ -2,7 +2,6 @@
 
 module System.Desktop.Sway.Command where
 
-import           Control.Monad
 import           Control.Monad.Trans        (MonadIO)
 import           Control.Monad.Trans.Except (except, throwE)
 import           Data.Aeson
