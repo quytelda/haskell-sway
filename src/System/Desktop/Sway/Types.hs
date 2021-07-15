@@ -298,29 +298,39 @@ parseNodeType "con"          = return ContainerNode
 parseNodeType "floating_con" = return FloatingNode
 parseNodeType _              = fail "invalid node type"
 
-data Node = Node { nodeID                 :: Int
-                 , nodeName               :: Maybe String
-                 , nodeType               :: NodeType
-                 , nodeBorder             :: String
-                 , nodeCurrentBorderWidth :: Int
-                 , nodeLayout             :: String
-                 , nodeOrientation        :: String
-                 , nodePercent            :: Double
-                 , nodeRect               :: Rectangle
-                 , nodeWindowRect         :: Rectangle
-                 , nodeDecoRect           :: Rectangle
-                 , nodeGeometry           :: Rectangle
-                 , nodeUrgent             :: Bool
-                 , nodeSticky             :: Bool
-                 , nodeMarks              :: [String]
-                 , nodeFocused            :: Bool
-                 , nodeFocus              :: [Int]
-                 , nodeNodes              :: [Node]
-                 , nodeFloatingNodes      :: [Node]
+data Node = Node { nodeID                  :: Int
+                 , nodeName                :: Maybe String
+                 , nodeType                :: NodeType
+                 , nodeBorder              :: String
+                 , nodeCurrentBorderWidth  :: Int
+                 , nodeLayout              :: String
+                 , nodeOrientation         :: String
+                 , nodePercent             :: Double
+                 , nodeRect                :: Rectangle
+                 , nodeWindowRect          :: Rectangle
+                 , nodeDecoRect            :: Rectangle
+                 , nodeGeometry            :: Rectangle
+                 , nodeUrgent              :: Bool
+                 , nodeSticky              :: Bool
+                 , nodeMarks               :: [String]
+                 , nodeFocused             :: Bool
+                 , nodeFocus               :: [Int]
+                 , nodeNodes               :: [Node]
+                 , nodeFloatingNodes       :: [Node]
+                 , nodeRepresentation      :: Maybe String
+                 , nodeFullscreenMode      :: Maybe Int
+                 , nodeAppId               :: Maybe String
+                 , nodePid                 :: Maybe Int
+                 , nodeVisible             :: Maybe Bool
+                 , nodeShell               :: Maybe String
+                 , nodeInhibitIdle         :: Maybe Bool
+                 , nodeWindow              :: Maybe Int
                  } deriving (Show)
 
 instance FromJSON Node where
   parseJSON = withObject "Node" $ \obj -> do
+
+    -- Global Fields
     nodeID                 <- obj .: "id"
     nodeName               <- obj .: "name"
     nodeType               <- obj .: "type" >>= parseNodeType
@@ -340,5 +350,15 @@ instance FromJSON Node where
     nodeFocus              <- obj .: "focus"
     nodeNodes              <- obj .: "nodes"
     nodeFloatingNodes      <- obj .: "floating_nodes"
+
+    -- Type-dependant Fields
+    nodeRepresentation     <- obj .:? "representation"
+    nodeFullscreenMode     <- obj .:? "fullscreen_mode"
+    nodeAppId              <- obj .:? "app_id"
+    nodePid                <- obj .:? "pid"
+    nodeVisible            <- obj .:? "visible"
+    nodeShell              <- obj .:? "shell"
+    nodeInhibitIdle        <- obj .:? "inhibit_idle"
+    nodeWindow             <- obj .:? "window"
 
     return Node{..}
