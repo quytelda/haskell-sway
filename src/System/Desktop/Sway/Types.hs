@@ -46,18 +46,7 @@ data EventType = WorkspaceEvent
                | TickEvent
                | BarStateUpdateEvent
                | InputEvent
-               deriving (Eq)
-
-instance Show EventType where
-  show WorkspaceEvent       = "workspace"
-  show ModeEvent            = "mode"
-  show WindowEvent          = "window"
-  show BarConfigUpdateEvent = "barconfig_update"
-  show BindingEvent         = "binding"
-  show ShutdownEvent        = "shutdown"
-  show TickEvent            = "tick"
-  show BarStateUpdateEvent  = "bar_state_update"
-  show InputEvent           = "input"
+               deriving (Eq, Show)
 
 instance ToJSON EventType where
   toJSON WorkspaceEvent       = "workspace"
