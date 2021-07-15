@@ -4,11 +4,11 @@
 module System.Desktop.Sway.IPC where
 
 import           Control.Exception          (bracket)
+import           Control.Monad
 import           Control.Monad.Trans        (MonadIO, liftIO)
 import           Control.Monad.Trans.Except (throwE)
 import           Data.Aeson
 import           Data.ByteString.Lazy       (ByteString)
-import           Data.Vector                (toList)
 import           Network.Socket
 import           System.Environment         (lookupEnv)
 
@@ -80,12 +80,9 @@ query type1 bytes = do
 
 -- | Subscribe to IPC events.
 -- Request to receive any events of the given types from sway.
--- Return a list describing which event subscriptions succeeded.
-subscribe :: (MonadIO m, SendRecv s) => [EventType] -> SwayT s m [(EventType, Bool)]
+subscribe :: (MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
 subscribe events = do
-  value <- query Subscribe (encode events)
-  rs    <- parseSway results value
-  return $ zip events rs
-  where
-    success = withObject "success" (.: "success")
-    results = withArray  "results" (mapM success . toList)
+  value   <- query Subscribe (encode events)
+  success <- parseSway (withObject "success" (.: "success")) value
+  unless success $
+    throwE $ "subscribing failed: " <> show events
