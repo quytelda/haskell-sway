@@ -9,7 +9,7 @@ import           Control.Monad.Trans            (MonadIO, lift)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
 import           Data.Aeson
-import           Data.Aeson.Types               (Parser)
+import           Data.Aeson.Types               (Parser, parseEither)
 import           Data.Binary.Get
 import           Data.Binary.Put
 import           Data.ByteString.Lazy           (ByteString)
@@ -192,6 +192,12 @@ getConnection = lift ask
 (?) :: Monoid p => Bool -> p -> p
 True  ? m = m
 False ? _ = mempty
+
+parseSway :: Monad m => (a -> Parser b) -> a -> SwayT s m b
+parseSway m = except . parseEither m
+
+swayDecode :: (FromJSON a, Monad m) => ByteString -> SwayT s m a
+swayDecode = except . eitherDecode
 
 data Rectangle = Rectangle { rectX      :: Int
                            , rectY      :: Int

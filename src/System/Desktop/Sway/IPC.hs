@@ -77,7 +77,7 @@ query type1 bytes = do
   reply <- ipc $ Message type1 bytes
   case reply of
     Message type2 payload
-      | type1 == type2 -> except $ eitherDecode payload
+      | type1 == type2 -> swayDecode payload
     _                  -> throwE $ "expected " <> show type1 <> " reply"
 
 -- | Parse a list of results.
