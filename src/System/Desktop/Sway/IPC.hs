@@ -82,7 +82,9 @@ query type1 bytes = do
 -- Request to receive any events of the given types from sway.
 subscribe :: (MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
 subscribe events = do
-  value   <- query Subscribe (encode events)
-  success <- parseSway (withObject "success" (.: "success")) value
+  success <- query Subscribe (encode events)
+             >>= parseSway result
   unless success $
     throwE $ "subscribing failed: " <> show events
+  where
+    result = withObject "success" (.: "success")
