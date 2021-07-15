@@ -59,6 +59,17 @@ instance Show EventType where
   show BarStateUpdateEvent  = "bar_state_update"
   show InputEvent           = "input"
 
+instance ToJSON EventType where
+  toJSON WorkspaceEvent       = "workspace"
+  toJSON ModeEvent            = "mode"
+  toJSON WindowEvent          = "window"
+  toJSON BarConfigUpdateEvent = "barconfig_update"
+  toJSON BindingEvent         = "binding"
+  toJSON ShutdownEvent        = "shutdown"
+  toJSON TickEvent            = "tick"
+  toJSON BarStateUpdateEvent  = "bar_state_update"
+  toJSON InputEvent           = "input"
+
 msgCodes :: [(MessageType, Word32)]
 msgCodes =
   [ (RunCommand,      0x00)

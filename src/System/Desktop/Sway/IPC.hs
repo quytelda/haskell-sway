@@ -4,11 +4,9 @@
 module System.Desktop.Sway.IPC where
 
 import           Control.Exception          (bracket)
-import           Control.Monad
 import           Control.Monad.Trans        (MonadIO, liftIO)
-import           Control.Monad.Trans.Except (except, throwE)
+import           Control.Monad.Trans.Except (throwE)
 import           Data.Aeson
-import           Data.Aeson.Types           (parseEither)
 import           Data.ByteString.Lazy       (ByteString)
 import           Data.Vector                (toList)
 import           Network.Socket
@@ -80,24 +78,14 @@ query type1 bytes = do
       | type1 == type2 -> swayDecode payload
     _                  -> throwE $ "expected " <> show type1 <> " reply"
 
--- | Parse a list of results.
-parseResults :: ByteString -> Either String [Bool]
-parseResults bytes = eitherDecode bytes >>= parseEither results
-  where
-    success = withObject "success" (.: "success")
-    results = withArray "results" (mapM success . toList)
-
 -- | Subscribe to IPC events.
 -- Request to receive any events of the given types from sway.
--- Throw an exception if subscribing fails for any of the requested event types.
-subscribe :: (MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
+-- Return a list describing which event subscriptions succeeded.
+subscribe :: (MonadIO m, SendRecv s) => [EventType] -> SwayT s m [(EventType, Bool)]
 subscribe events = do
-  reply <- ipc $ Message Subscribe $ encode $ map show events
-  case reply of
-    Message Subscribe payload -> do
-      fs <- except $ failures <$> parseResults payload
-      unless (null fs) $
-        throwE $ "Couldn't subscribe to: " <> show fs
-    _                         -> throwE "expected SUBSCRIBE reply"
+  value <- query Subscribe (encode events)
+  rs    <- parseSway results value
+  return $ zip events rs
   where
-    failures = map fst . filter snd . zip events
+    success = withObject "success" (.: "success")
+    results = withArray  "results" (mapM success . toList)
