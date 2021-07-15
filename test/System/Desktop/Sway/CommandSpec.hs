@@ -31,11 +31,4 @@ reply_RunCommand_failure = encode [ resultSuccess_json
                                   ]
 
 spec :: Spec
-spec = describe "Command" $ do
-  describe "decodeResults" $ do
-    context "when provided valid input" $ do
-      it "should succeed when all commands succeeded" $
-        decodeResults reply_RunCommand_success `shouldBe` Right ()
-
-      it "returns an error message if any command failed" $
-        decodeResults reply_RunCommand_failure `shouldSatisfy` isLeft
+spec = undefined
