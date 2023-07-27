@@ -182,8 +182,7 @@ instance SendRecv Socket where
   recv = SocketBL.getContents
 
 -- | Fetch the connection object within the monad.
--- Since the connection object implements SendRecv, it can send or recv data.
-getConnection :: (MonadIO m, SendRecv s) => SwayT s m s
+getConnection :: MonadIO m => SwayT s m s
 getConnection = lift ask
 
 -- | Conditionally provide a monoidal value.
