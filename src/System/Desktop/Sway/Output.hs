@@ -3,8 +3,6 @@
 module System.Desktop.Sway.Output where
 
 import           Control.Monad.Trans        (MonadIO)
-import           Control.Monad.Trans.Except (except, throwE)
-import           Data.Aeson                 (eitherDecode)
 
 import           System.Desktop.Sway.Types
 import           System.Desktop.Sway.IPC
