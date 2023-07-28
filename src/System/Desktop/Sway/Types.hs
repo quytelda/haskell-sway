@@ -150,7 +150,7 @@ getMessage = do
 
   case mkMessage code payload of
     Just msg -> return msg
-    Nothing  -> fail $ "Unknown message type code:" <> show code
+    Nothing  -> fail $ "Unknown message type code: " <> show code
 
 -- | Encode a binary sway IPC protocol message.
 msgEncode :: Message -> ByteString

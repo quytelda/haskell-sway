@@ -83,7 +83,7 @@ specDecode = describe "msgDecode" $ do
     "i3-xyz\ETX\NUL\NUL\NUL\NUL\NUL\NUL\NULnop" `shouldYield` Left "Expected magic string."
 
   it "expects a valid message type code" $
-    "i3-ipc\ETX\NUL\NUL\NUL\SI\NUL\NUL\NULnop" `shouldYield` Left "Unknown message type code:15"
+    "i3-ipc\ETX\NUL\NUL\NUL\SI\NUL\NUL\NULnop" `shouldYield` Left "Unknown message type code: 15"
 
   it "expects enough bytes" $
     "i3-ipc\ETX\NUL\NUL\NUL\NUL\NUL\NUL\NUL" `shouldYield` Left "not enough bytes"
