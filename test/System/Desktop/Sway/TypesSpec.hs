@@ -71,12 +71,12 @@ specMessage = describe "Message" $ do
 
 specEncode :: Spec
 specEncode = describe "msgEncode" $ do
-  it "can serialize messages" $
+  it "can encode binary messages" $
     msgEncode msg_RunCommand_exit `shouldBe` bin_RunCommand_exit
 
 specDecode :: Spec
 specDecode = describe "msgDecode" $ do
-  it "can deserialize messages" $
+  it "can decode binary messages" $
     bin_RunCommand_exit `shouldYield` Right msg_RunCommand_exit
 
   it "expects a correct magic string" $
@@ -85,7 +85,7 @@ specDecode = describe "msgDecode" $ do
   it "expects a valid message type code" $
     "i3-ipc\ETX\NUL\NUL\NUL\SI\NUL\NUL\NULnop" `shouldYield` Left "Unknown message type code: 15"
 
-  it "expects enough bytes" $
+  it "expects enough input bytes" $
     "i3-ipc\ETX\NUL\NUL\NUL\NUL\NUL\NUL\NUL" `shouldYield` Left "not enough bytes"
   where
     shouldYield bs = shouldBe (msgDecode bs)
