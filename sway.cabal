@@ -11,7 +11,7 @@ homepage:       https://github.com/quytelda/haskell-sway#readme
 bug-reports:    https://github.com/quytelda/haskell-sway/issues
 author:         Quytelda Kahja
 maintainer:     quytelda@tamalin.org
-copyright:      Copyright (C) 2020 Quytelda Kahja
+copyright:      Copyright 2023 Quytelda Kahja
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple

@@ -4,7 +4,7 @@ github:              "quytelda/haskell-sway"
 license:             BSD3
 author:              "Quytelda Kahja"
 maintainer:          "quytelda@tamalin.org"
-copyright:           "Copyright (C) 2020 Quytelda Kahja"
+copyright:           "Copyright 2023 Quytelda Kahja"
 
 extra-source-files:
 - README.md
