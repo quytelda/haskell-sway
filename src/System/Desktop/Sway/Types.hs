@@ -185,13 +185,6 @@ instance SendRecv Socket where
 getConnection :: MonadIO m => SwayT s m s
 getConnection = lift ask
 
--- | Conditionally provide a monoidal value.
--- E.g. `(p ? x)` evaluates to `x` when `p` is true, but `mempty` otherwise.
--- Useful for conditional concatenation: `str <> (p ? "optional")`.
-(?) :: Monoid p => Bool -> p -> p
-True  ? m = m
-False ? _ = mempty
-
 parseSway :: Monad m => (a -> Parser b) -> a -> SwayT s m b
 parseSway m = except . parseEither m
 
