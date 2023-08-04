@@ -28,6 +28,7 @@ library
       System.Desktop.Sway.Command
       System.Desktop.Sway.IPC
       System.Desktop.Sway.Output
+      System.Desktop.Sway.Tree
       System.Desktop.Sway.Types
       System.Desktop.Sway.Workspaces
   other-modules:
