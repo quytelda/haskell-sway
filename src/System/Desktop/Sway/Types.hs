@@ -246,6 +246,7 @@ data Output = Output { outputName             ::  String
                      , outputSerial           ::  String
                      , outputActive           ::  Bool
                      , outputDPMS             ::  Bool
+                     , outputPower            ::  Bool
                      , outputPrimary          ::  Bool
                      , outputScale            ::  Double
                      , outputSubpixelHinting  ::  String
@@ -264,6 +265,7 @@ instance FromJSON Output where
     outputSerial           <- obj .: "serial"
     outputActive           <- obj .: "active"
     outputDPMS             <- obj .: "dpms"
+    outputPower            <- obj .: "power"
     outputPrimary          <- obj .: "primary"
     outputScale            <- obj .: "scale"
     outputSubpixelHinting  <- obj .: "subpixel_hinting"
