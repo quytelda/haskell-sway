@@ -195,7 +195,7 @@ data Rectangle = Rectangle { rectX      :: Int
                            , rectY      :: Int
                            , rectWidth  :: Int
                            , rectHeight :: Int
-                           } deriving (Show)
+                           } deriving (Eq, Show)
 
 instance FromJSON Rectangle where
   parseJSON = withObject "Rectangle" $ \obj -> do
@@ -213,7 +213,7 @@ data Workspace = Workspace { wsNum     :: Int
                            , wsUrgent  :: Bool
                            , wsRect    :: Rectangle
                            , wsOutput  :: String
-                           } deriving (Show)
+                           } deriving (Eq, Show)
 
 instance FromJSON Workspace where
   parseJSON = withObject "Workspace" $ \obj -> do
@@ -230,7 +230,7 @@ instance FromJSON Workspace where
 data OutputMode = OutputMode { modeWidth   :: Int
                              , modeHeight  :: Int
                              , modeRefresh :: Int
-                             } deriving (Show)
+                             } deriving (Eq, Show)
 
 instance FromJSON OutputMode where
   parseJSON = withObject "OutputMode" $ \obj -> do
@@ -254,7 +254,7 @@ data Output = Output { outputName             ::  String
                      , outputModes            ::  [OutputMode]
                      , outputCurrentMode      ::  OutputMode
                      , outputRect             ::  Rectangle
-                     } deriving (Show)
+                     } deriving (Eq, Show)
 
 instance FromJSON Output where
   parseJSON = withObject "Output" $ \obj -> do
@@ -280,7 +280,7 @@ data NodeType = RootNode
               | WorkspaceNode
               | ContainerNode
               | FloatingNode
-              deriving (Show)
+              deriving (Eq, Show)
 
 parseNodeType :: String -> Parser NodeType
 parseNodeType "root"         = return RootNode
@@ -309,7 +309,7 @@ data Node = Node { nodeID                 :: Int
                  , nodeFocus              :: [Int]
                  , nodeNodes              :: [Node]
                  , nodeFloatingNodes      :: [Node]
-                 } deriving (Show)
+                 } deriving (Eq, Show)
 
 instance FromJSON Node where
   parseJSON = withObject "Node" $ \obj -> do
