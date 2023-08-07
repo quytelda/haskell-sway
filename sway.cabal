@@ -29,6 +29,7 @@ library
       System.Desktop.Sway.IPC
       System.Desktop.Sway.Message
       System.Desktop.Sway.Output
+      System.Desktop.Sway.Rectangle
       System.Desktop.Sway.Tree
       System.Desktop.Sway.Types
       System.Desktop.Sway.Workspaces
@@ -53,6 +54,7 @@ test-suite sway-test
   main-is: Spec.hs
   other-modules:
       System.Desktop.Sway.CommandSpec
+      System.Desktop.Sway.MessageSpec
       System.Desktop.Sway.TypesSpec
       Paths_sway
   hs-source-dirs:
