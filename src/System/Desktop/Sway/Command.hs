@@ -2,14 +2,15 @@
 
 module System.Desktop.Sway.Command where
 
-import           Control.Monad              (guard)
-import           Control.Monad.Trans        (MonadIO)
-import           Control.Monad.Trans.Except (except)
+import           Control.Monad               (guard)
+import           Control.Monad.Trans         (MonadIO)
+import           Control.Monad.Trans.Except  (except)
 import           Data.Aeson
-import           Data.Aeson.Types           (Parser, listParser)
-import           Data.ByteString.Lazy       (ByteString)
+import           Data.Aeson.Types            (Parser, listParser)
+import           Data.ByteString.Lazy        (ByteString)
 
 import           System.Desktop.Sway.IPC
+import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
 -- | Parse a sway command result JSON object.

@@ -3,15 +3,16 @@
 
 module System.Desktop.Sway.IPC where
 
-import           Control.Exception          (bracket)
+import           Control.Exception           (bracket)
 import           Control.Monad
-import           Control.Monad.Trans        (MonadIO, liftIO)
-import           Control.Monad.Trans.Except (throwE)
+import           Control.Monad.Trans         (MonadIO, liftIO)
+import           Control.Monad.Trans.Except  (throwE)
 import           Data.Aeson
-import           Data.ByteString.Lazy       (ByteString)
+import           Data.ByteString.Lazy        (ByteString)
 import           Network.Socket
-import           System.Environment         (lookupEnv)
+import           System.Environment          (lookupEnv)
 
+import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
 -- | Find the path to the sway socket file.
