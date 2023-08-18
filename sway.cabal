@@ -27,6 +27,7 @@ library
   exposed-modules:
       System.Desktop.Sway.Command
       System.Desktop.Sway.IPC
+      System.Desktop.Sway.Marks
       System.Desktop.Sway.Message
       System.Desktop.Sway.Output
       System.Desktop.Sway.Rectangle
