@@ -6,11 +6,13 @@ module System.Desktop.Sway.Bar where
 import           Control.Monad.Trans         (MonadIO)
 import           Data.Aeson
 import           Data.ByteString.Lazy        (ByteString)
+import qualified Data.Map.Strict             as Map
 
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
+-- TODO: Implement more detailed types for barColors and barGaps
 data BarConfig = BarConfig { barId                   :: String
                            , barMode                 :: String
                            , barPosition             :: String
@@ -20,8 +22,8 @@ data BarConfig = BarConfig { barId                   :: String
                            , barWorkspaceMinWidth    :: Int
                            , barBindingModeIndicator :: Bool
                            , barVerbose              :: Bool
-                           , barColors               :: Object
-                           , barGaps                 :: Object
+                           , barColors               :: Map.Map String String
+                           , barGaps                 :: Map.Map String Int
                            , barHeight               :: Int
                            , barStatusPadding        :: Int
                            , barStatusEdgePadding    :: Int
@@ -50,5 +52,5 @@ instance FromJSON BarConfig where
 getBarConfig :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m [String]
 getBarConfig barID = query GetBarConfig barID
 
-getBars :: (MonadIO m, SendRecv s) => SwayT s m BarConfig
-getBars = query GetBarConfig ""
+getBarIDs :: (MonadIO m, SendRecv s) => SwayT s m BarConfig
+getBarIDs = query GetBarConfig ""
