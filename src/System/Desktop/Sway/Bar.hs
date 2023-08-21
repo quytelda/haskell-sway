@@ -11,11 +11,38 @@ import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
-data BarConfig = BarConfig { barId :: String }
+data BarConfig = BarConfig { barId                   :: String
+                           , barMode                 :: String
+                           , barPosition             :: String
+                           , barStatusCommand        :: String
+                           , barFont                 :: String
+                           , barWorkspaceButtons     :: Bool
+                           , barWorkspaceMinWidth    :: Int
+                           , barBindingModeIndicator :: Bool
+                           , barVerbose              :: Bool
+                           , barColors               :: Object
+                           , barGaps                 :: Object
+                           , barHeight               :: Int
+                           , barStatusPadding        :: Int
+                           , barStatusEdgePadding    :: Int
+                           } deriving (Eq, Show)
 
 instance FromJSON BarConfig where
   parseJSON = withObject "BarConfig" $ \obj -> do
-    barId <- obj .: "id"
+    barId                   <- obj .: "id"
+    barMode                 <- obj .: "mode"
+    barPosition             <- obj .: "position"
+    barStatusCommand        <- obj .: "status_command"
+    barFont                 <- obj .: "font"
+    barWorkspaceButtons     <- obj .: "workspace_buttons"
+    barWorkspaceMinWidth    <- obj .: "workspace_min_width"
+    barBindingModeIndicator <- obj .: "binding_mode_indicator"
+    barVerbose              <- obj .: "verbose"
+    barColors               <- obj .: "colors"
+    barGaps                 <- obj .: "gaps"
+    barHeight               <- obj .: "bar_height"
+    barStatusPadding        <- obj .: "status_padding"
+    barStatusEdgePadding    <- obj .: "status_edge_padding"
 
     return BarConfig{..}
 
