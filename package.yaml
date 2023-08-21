@@ -24,6 +24,7 @@ dependencies:
 - base >= 4.7 && < 5
 - binary >= 0.8
 - bytestring >= 0.10
+- containers >= 0.6.4 && < 0.7
 - mtl >= 2.2 && < 3
 - network >= 3.1 && < 4
 - transformers >= 0.5
