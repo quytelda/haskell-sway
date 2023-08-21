@@ -34,6 +34,7 @@ library
       System.Desktop.Sway.Rectangle
       System.Desktop.Sway.Tree
       System.Desktop.Sway.Types
+      System.Desktop.Sway.Version
       System.Desktop.Sway.Workspaces
   other-modules:
       Paths_sway
