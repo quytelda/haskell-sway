@@ -35,11 +35,12 @@ instance SendRecv Socket where
 getConnection :: MonadIO m => SwayT s m s
 getConnection = ask
 
+-- | Lift an Either String
 eitherToSway :: (MonadError e m, FromString e) => Either String a -> m a
 eitherToSway = either throwString return
 
 parseSway :: (MonadError e m, FromString e) => (a -> Parser b) -> a -> SwayT s m b
 parseSway m = eitherToSway . parseEither m
 
-swayDecode :: (FromJSON a, MonadError e m, FromString e) => ByteString -> SwayT s m a
+swayDecode :: (MonadError e m, FromString e, FromJSON a) => ByteString -> SwayT s m a
 swayDecode = eitherToSway . eitherDecode

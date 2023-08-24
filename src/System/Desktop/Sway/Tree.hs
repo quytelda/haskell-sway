@@ -75,5 +75,5 @@ instance FromJSON Node where
 
 -- | Get the current layout tree.
 -- Send a `GET_TREE` IPC message and return the parsed result.
-getTree :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m Node
+getTree :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m Node
 getTree = query GetTree ""
