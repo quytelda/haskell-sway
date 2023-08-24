@@ -3,9 +3,10 @@
 
 module System.Desktop.Sway.Version where
 
-import           Control.Monad.Trans         (MonadIO)
+import           Control.Monad.Except
 import           Data.Aeson
 
+import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
@@ -27,5 +28,5 @@ instance FromJSON SwayVersion where
 
     return SwayVersion{..}
 
-getVersion :: (MonadIO m, SendRecv s) => SwayT s m SwayVersion
+getVersion :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m SwayVersion
 getVersion = query GetVersion ""

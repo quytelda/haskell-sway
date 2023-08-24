@@ -3,15 +3,15 @@
 
 module System.Desktop.Sway.IPC where
 
-import           Control.Exception           (bracket)
+import           Control.Exception             (bracket)
 import           Control.Monad
-import           Control.Monad.Trans         (MonadIO, liftIO)
-import           Control.Monad.Trans.Except  (throwE)
+import           Control.Monad.Except
 import           Data.Aeson
-import           Data.ByteString.Lazy        (ByteString)
+import           Data.ByteString.Lazy          (ByteString)
 import           Network.Socket
-import           System.Environment          (lookupEnv)
+import           System.Environment            (lookupEnv)
 
+import           System.Desktop.Sway.Exception hiding (fromString)
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
@@ -57,35 +57,35 @@ sendMessage = sendBytes . msgEncode
 
 -- | Receive a Message using the connection object within the monad.
 -- Throws an exception if the received message cannot be parsed.
-recvMessage :: (MonadIO m, SendRecv s) => SwayT s m Message
+recvMessage :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m Message
 recvMessage = do
   bytes <- recvBytes
   case msgDecode bytes of
-    Left  err -> throwE err
+    Left  err -> throwString err
     Right msg -> return msg
 
 -- | Send an IPC message and receive the reply.
-ipc :: (MonadIO m, SendRecv s) => Message -> SwayT s m Message
+ipc :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => Message -> SwayT s m Message
 ipc msg = sendMessage msg >> recvMessage
 
 -- | Send a sway IPC message, receive the reply, and parse it's payload.
 -- Construct the outgoing IPC message with the given type and payload.
 -- Fail if the outgoing and incoming types don't match.
-query :: (FromJSON a, MonadIO m, SendRecv s) => MessageType -> ByteString -> SwayT s m a
+query :: (FromJSON a, FromString e, MonadError e m, MonadIO m, SendRecv s) => MessageType -> ByteString -> SwayT s m a
 query type1 bytes = do
   reply <- ipc $ Message type1 bytes
   case reply of
     Message type2 payload
       | type1 == type2 -> swayDecode payload
-    _                  -> throwE $ "expected " <> show type1 <> " reply"
+    _                  -> throwString $ "expected " <> show type1 <> " reply"
 
 -- | Subscribe to IPC events.
 -- Request to receive any events of the given types from sway.
-subscribe :: (MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
+subscribe :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
 subscribe events = do
   success <- query Subscribe (encode events)
              >>= parseSway result
   unless success $
-    throwE $ "subscribing failed: " <> show events
+    throwString $ "subscribing failed: " <> show events
   where
     result = withObject "success" (.: "success")

@@ -3,11 +3,12 @@
 
 module System.Desktop.Sway.Bar where
 
-import           Control.Monad.Trans         (MonadIO)
+import           Control.Monad.Except
 import           Data.Aeson
-import           Data.ByteString.Lazy        (ByteString)
-import qualified Data.Map.Strict             as Map
+import           Data.ByteString.Lazy          (ByteString)
+import qualified Data.Map.Strict               as Map
 
+import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
@@ -49,8 +50,8 @@ instance FromJSON BarConfig where
     return BarConfig{..}
 
 -- | Get the list of marks currently set.
-getBarConfig :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m BarConfig
+getBarConfig :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => ByteString -> SwayT s m BarConfig
 getBarConfig barID = query GetBarConfig barID
 
-getBarIDs :: (MonadIO m, SendRecv s) => SwayT s m [String]
+getBarIDs :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m [String]
 getBarIDs = query GetBarConfig ""
