@@ -11,5 +11,5 @@ import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
 -- | Get the list of marks currently set.
-getMarks :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m [String]
+getMarks :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m [String]
 getMarks = query GetMarks ""

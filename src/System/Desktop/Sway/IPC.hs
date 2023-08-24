@@ -57,7 +57,7 @@ sendMessage = sendBytes . msgEncode
 
 -- | Receive a Message using the connection object within the monad.
 -- Throws an exception if the received message cannot be parsed.
-recvMessage :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m Message
+recvMessage :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m Message
 recvMessage = do
   bytes <- recvBytes
   case msgDecode bytes of
@@ -65,13 +65,14 @@ recvMessage = do
     Right msg -> return msg
 
 -- | Send an IPC message and receive the reply.
-ipc :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => Message -> SwayT s m Message
+ipc :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => Message -> SwayT s m Message
 ipc msg = sendMessage msg >> recvMessage
 
 -- | Send a sway IPC message, receive the reply, and parse it's payload.
 -- Construct the outgoing IPC message with the given type and payload.
 -- Fail if the outgoing and incoming types don't match.
-query :: (FromJSON a, FromString e, MonadError e m, MonadIO m, SendRecv s) => MessageType -> ByteString -> SwayT s m a
+query :: (MonadError e m, FromString e, MonadIO m, SendRecv s, FromJSON a) =>
+         MessageType -> ByteString -> SwayT s m a
 query type1 bytes = do
   reply <- ipc $ Message type1 bytes
   case reply of
@@ -81,7 +82,7 @@ query type1 bytes = do
 
 -- | Subscribe to IPC events.
 -- Request to receive any events of the given types from sway.
-subscribe :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
+subscribe :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
 subscribe events = do
   success <- query Subscribe (encode events)
              >>= parseSway result

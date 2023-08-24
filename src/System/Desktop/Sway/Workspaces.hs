@@ -35,5 +35,5 @@ instance FromJSON Workspace where
 
 -- | Get the list of sway workspaces.
 -- Send a `GET_WORKSPACES` IPC message and return the parsed results.
-getWorkspaces :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m [Workspace]
+getWorkspaces :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m [Workspace]
 getWorkspaces = query GetWorkspaces ""
