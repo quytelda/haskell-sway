@@ -4,17 +4,18 @@
 module System.Desktop.Sway.Input where
 
 import           Control.Monad
-import           Control.Monad.Trans         (MonadIO)
+import           Control.Monad.Except
 import           Data.Aeson
 
+import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
-getBindingModes :: (MonadIO m, SendRecv s) => SwayT s m [String]
+getBindingModes :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m [String]
 getBindingModes = query GetBindingModes ""
 
-getBindingState :: (MonadIO m, SendRecv s) => SwayT s m String
+getBindingState :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m String
 getBindingState = query GetBindingState "" >>= parseSway (.: "name")
 
 data Input = Input { inputIdentifier      :: String
@@ -45,5 +46,5 @@ instance FromJSON Input where
 
     return Input{..}
 
-getInputs :: (MonadIO m, SendRecv s) => SwayT s m [Input]
+getInputs :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m [Input]
 getInputs = query GetInputs ""

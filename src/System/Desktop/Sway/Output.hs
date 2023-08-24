@@ -3,9 +3,10 @@
 
 module System.Desktop.Sway.Output where
 
-import           Control.Monad.Trans           (MonadIO)
+import           Control.Monad.Except
 import           Data.Aeson
 
+import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Rectangle
@@ -63,5 +64,5 @@ instance FromJSON Output where
 
 -- | Get the list of sway outputs.
 -- Send a `GET_OUTPUTS` IPC message and return the parsed results.
-getOutputs :: (MonadIO m, SendRecv s) => SwayT s m [Output]
+getOutputs :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m [Output]
 getOutputs = query GetOutputs ""

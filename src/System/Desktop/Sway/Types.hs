@@ -3,8 +3,7 @@
 
 module System.Desktop.Sway.Types where
 
-import           Control.Monad.Trans            (MonadIO, lift)
-import           Control.Monad.Trans.Except
+import           Control.Monad.Except
 import           Control.Monad.Trans.Reader
 import           Data.Aeson
 import           Data.Aeson.Types               (Parser, parseEither)
@@ -12,15 +11,17 @@ import           Data.ByteString.Lazy           (ByteString)
 import           Network.Socket
 import qualified Network.Socket.ByteString.Lazy as SocketBL
 
+import           System.Desktop.Sway.Exception  hiding (fromString)
+
 -- | The sway monad encapsulates a computation within the context of a
 -- sway IPC connection.
-type SwayT s m = ExceptT String (ReaderT s m)
+type SwayT s m = ReaderT s m
 type Sway = SwayT Socket IO
 
--- | Unwrap a computation in the sway monad.
+-- | Unwrap a computation in the Sway monad.
 -- Returns either the computation result or an error message in the base monad.
-runSwayT :: SwayT s m a -> s -> m (Either String a)
-runSwayT = runReaderT . runExceptT
+runSwayT :: SwayT s m a -> s -> m a
+runSwayT = runReaderT
 
 class SendRecv a where
   send :: a -> ByteString -> IO ()
@@ -32,10 +33,18 @@ instance SendRecv Socket where
 
 -- | Fetch the connection object within the monad.
 getConnection :: MonadIO m => SwayT s m s
-getConnection = lift ask
+getConnection = ask
 
-parseSway :: Monad m => (a -> Parser b) -> a -> SwayT s m b
-parseSway m = except . parseEither m
+parseSway :: (FromString e, MonadError e m) => (a -> Parser b) -> a -> SwayT s m b
+parseSway m v = case parseEither m v of
+  Left err -> throwString err
+  Right x  -> return x
 
-swayDecode :: (FromJSON a, Monad m) => ByteString -> SwayT s m a
-swayDecode = except . eitherDecode
+swayDecode :: (FromJSON a, FromString e, MonadError e m) => ByteString -> SwayT s m a
+swayDecode bs = case eitherDecode bs of
+  Left err -> throwString err
+  Right x  -> return x
+
+eitherToSway :: (MonadError e m, FromString e) => Either String a -> m a
+eitherToSway (Left err) = throwString err
+eitherToSway (Right x)  = return x

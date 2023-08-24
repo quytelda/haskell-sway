@@ -3,9 +3,10 @@
 
 module System.Desktop.Sway.Workspaces where
 
-import           Control.Monad.Trans           (MonadIO)
+import           Control.Monad.Except
 import           Data.Aeson
 
+import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Rectangle
@@ -34,5 +35,5 @@ instance FromJSON Workspace where
 
 -- | Get the list of sway workspaces.
 -- Send a `GET_WORKSPACES` IPC message and return the parsed results.
-getWorkspaces :: (MonadIO m, SendRecv s) => SwayT s m [Workspace]
+getWorkspaces :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => SwayT s m [Workspace]
 getWorkspaces = query GetWorkspaces ""

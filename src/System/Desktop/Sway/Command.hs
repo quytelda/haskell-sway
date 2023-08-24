@@ -2,13 +2,12 @@
 
 module System.Desktop.Sway.Command where
 
-import           Control.Monad               (guard)
-import           Control.Monad.Trans         (MonadIO)
-import           Control.Monad.Trans.Except  (except)
+import           Control.Monad.Except
 import           Data.Aeson
-import           Data.Aeson.Types            (Parser, listParser)
-import           Data.ByteString.Lazy        (ByteString)
+import           Data.Aeson.Types              (Parser, listParser)
+import           Data.ByteString.Lazy          (ByteString)
 
+import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
@@ -28,9 +27,9 @@ status = withObject "status" $ \obj -> do
 
 -- | Run a sway command.
 -- Send a RUN_COMMAND IPC message and return the reply payload.
-runCommand :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
+runCommand :: (FromString e, MonadError e m, MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
 runCommand cmd = query RunCommand cmd
                  >>= parseSway results
-                 >>= except . sequence_
+                 >>= eitherToSway . sequence_
   where
     results = listParser status
