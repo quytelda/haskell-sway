@@ -59,11 +59,7 @@ sendMessage = sendBytes . msgEncode
 -- | Receive a Message using the connection object within the monad.
 -- Throws an exception if the received message cannot be parsed.
 recvMessage :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Message
-recvMessage = do
-  bytes <- recvBytes
-  case msgDecode bytes of
-    Left  err -> throwString err
-    Right msg -> return msg
+recvMessage = recvBytes >>= eitherToSway . msgDecode
 
 -- | Send an IPC message and receive the reply.
 ipc :: (MonadError e m, FromString e, SendRecv s m) => Message -> SwayT s m Message
