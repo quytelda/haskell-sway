@@ -12,10 +12,10 @@ import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
-getBindingModes :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m [String]
+getBindingModes :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
 getBindingModes = query GetBindingModes ""
 
-getBindingState :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m String
+getBindingState :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
 getBindingState = query GetBindingState "" >>= parseSway (.: "name")
 
 data Input = Input { inputIdentifier      :: String
@@ -46,5 +46,5 @@ instance FromJSON Input where
 
     return Input{..}
 
-getInputs :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m [Input]
+getInputs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Input]
 getInputs = query GetInputs ""

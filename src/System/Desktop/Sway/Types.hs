@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module System.Desktop.Sway.Types where
 
@@ -23,16 +24,16 @@ type Sway = SwayT Socket IO
 runSwayT :: SwayT s m a -> s -> m a
 runSwayT = runReaderT
 
-class SendRecv a where
-  send :: a -> ByteString -> IO ()
-  recv :: a -> IO ByteString
+class Monad m => SendRecv s m where
+  send :: s -> ByteString -> m ()
+  recv :: s -> m ByteString
 
-instance SendRecv Socket where
+instance SendRecv Socket IO where
   send = SocketBL.sendAll
   recv = SocketBL.getContents
 
 -- | Fetch the connection object within the monad.
-getConnection :: MonadIO m => SwayT s m s
+getConnection :: Monad m => SwayT s m s
 getConnection = ask
 
 -- | Lift an Either String
