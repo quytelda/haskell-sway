@@ -50,8 +50,8 @@ instance FromJSON BarConfig where
     return BarConfig{..}
 
 -- | Get the list of marks currently set.
-getBarConfig :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => ByteString -> SwayT s m BarConfig
+getBarConfig :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m BarConfig
 getBarConfig barID = query GetBarConfig barID
 
-getBarIDs :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m [String]
+getBarIDs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
 getBarIDs = query GetBarConfig ""

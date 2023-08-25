@@ -28,5 +28,5 @@ instance FromJSON SwayVersion where
 
     return SwayVersion{..}
 
-getVersion :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m SwayVersion
+getVersion :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m SwayVersion
 getVersion = query GetVersion ""

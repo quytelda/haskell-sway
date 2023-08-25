@@ -16,6 +16,7 @@ import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
 -- | Find the path to the sway socket file.
+-- The path is stored in the $SWAYSOCK environment variable.
 getSocketPath :: IO (Maybe FilePath)
 getSocketPath = lookupEnv "SWAYSOCK"
 
@@ -44,20 +45,20 @@ withSwaySocket f = getSocketPath >>= \case
   Nothing   -> fail "Unable to get sway socket path."
 
 -- | Send bytes using the connection object within the monad.
-sendBytes :: (MonadIO m, SendRecv s) => ByteString -> SwayT s m ()
-sendBytes bytes = getConnection >>= liftIO . flip send bytes
+sendBytes :: SendRecv s m => ByteString -> SwayT s m ()
+sendBytes bytes = getConnection >>= lift . flip send bytes
 
 -- | Receive bytes using the connection object within the monad.
-recvBytes :: (MonadIO m, SendRecv s) => SwayT s m ByteString
-recvBytes = getConnection >>= liftIO . recv
+recvBytes :: SendRecv s m => SwayT s m ByteString
+recvBytes = getConnection >>= lift . recv
 
 -- | Send a Message using the connection object within the monad.
-sendMessage :: (MonadIO m, SendRecv s) => Message -> SwayT s m ()
+sendMessage :: SendRecv s m => Message -> SwayT s m ()
 sendMessage = sendBytes . msgEncode
 
 -- | Receive a Message using the connection object within the monad.
 -- Throws an exception if the received message cannot be parsed.
-recvMessage :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => SwayT s m Message
+recvMessage :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Message
 recvMessage = do
   bytes <- recvBytes
   case msgDecode bytes of
@@ -65,13 +66,13 @@ recvMessage = do
     Right msg -> return msg
 
 -- | Send an IPC message and receive the reply.
-ipc :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => Message -> SwayT s m Message
+ipc :: (MonadError e m, FromString e, SendRecv s m) => Message -> SwayT s m Message
 ipc msg = sendMessage msg >> recvMessage
 
 -- | Send a sway IPC message, receive the reply, and parse it's payload.
 -- Construct the outgoing IPC message with the given type and payload.
 -- Fail if the outgoing and incoming types don't match.
-query :: (MonadError e m, FromString e, MonadIO m, SendRecv s, FromJSON a) =>
+query :: (MonadError e m, FromString e, SendRecv s m, FromJSON a) =>
          MessageType -> ByteString -> SwayT s m a
 query type1 bytes = do
   reply <- ipc $ Message type1 bytes
@@ -82,7 +83,7 @@ query type1 bytes = do
 
 -- | Subscribe to IPC events.
 -- Request to receive any events of the given types from sway.
-subscribe :: (MonadError e m, FromString e, MonadIO m, SendRecv s) => [EventType] -> SwayT s m ()
+subscribe :: (MonadError e m, FromString e, SendRecv s m) => [EventType] -> SwayT s m ()
 subscribe events = do
   success <- query Subscribe (encode events)
              >>= parseSway result
