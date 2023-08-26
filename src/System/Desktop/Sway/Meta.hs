@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module System.Desktop.Sway.Version where
+module System.Desktop.Sway.Meta where
 
 import           Control.Monad.Except
 import           Data.Aeson

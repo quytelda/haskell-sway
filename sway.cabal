@@ -32,11 +32,11 @@ library
       System.Desktop.Sway.IPC
       System.Desktop.Sway.Marks
       System.Desktop.Sway.Message
+      System.Desktop.Sway.Meta
       System.Desktop.Sway.Output
       System.Desktop.Sway.Rectangle
       System.Desktop.Sway.Tree
       System.Desktop.Sway.Types
-      System.Desktop.Sway.Version
       System.Desktop.Sway.Workspaces
   other-modules:
       Paths_sway
