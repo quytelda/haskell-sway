@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+{-|
+Description : A Rectangle type for describing graphical geometry.
+-}
 module System.Desktop.Sway.Rectangle where
 
 import Data.Aeson

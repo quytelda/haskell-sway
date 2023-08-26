@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+{-|
+Description : Types and functions for encoding and decoding sway IPC messages.
+-}
 module System.Desktop.Sway.Message where
 
 import           Control.Applicative
