@@ -17,8 +17,8 @@ import           System.Desktop.Sway.Types
 
 -- | Find the path to the sway socket file.
 -- The path is stored in the $SWAYSOCK environment variable.
-getSocketPath :: IO (Maybe FilePath)
-getSocketPath = lookupEnv "SWAYSOCK"
+findSwaySocket :: IO (Maybe FilePath)
+findSwaySocket = lookupEnv "SWAYSOCK"
 
 -- | Connect to a UNIX domain socket at the given file path.
 -- The socket must exist.
@@ -40,7 +40,7 @@ withUnixSocket path = bracket (openUnixSocket path) closeUnixSocket
 -- | Execute an action that uses the system sway socket.
 -- Fails if the sway socket cannot be located.
 withSwaySocket :: (Socket -> IO a) -> IO a
-withSwaySocket f = getSocketPath >>= \case
+withSwaySocket f = findSwaySocket >>= \case
   Just path -> withUnixSocket path f
   Nothing   -> fail "Unable to get sway socket path."
 
