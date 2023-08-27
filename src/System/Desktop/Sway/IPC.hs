@@ -87,3 +87,6 @@ subscribe events = do
     throwString $ "subscribing failed: " <> show events
   where
     result = withObject "success" (.: "success")
+
+sendTick :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m Bool
+sendTick payload = query SendTick payload >>= parseSway (.: "success")
