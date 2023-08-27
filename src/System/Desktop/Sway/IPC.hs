@@ -90,3 +90,6 @@ subscribe events = do
 
 sendTick :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m Bool
 sendTick payload = query SendTick payload >>= parseSway (.: "success")
+
+sync :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Bool
+sync = query Sync "" >>= parseSway (.: "success")
