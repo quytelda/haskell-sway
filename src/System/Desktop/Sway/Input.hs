@@ -48,3 +48,21 @@ instance FromJSON Input where
 
 getInputs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Input]
 getInputs = query GetInputs ""
+
+data Seat = Seat { seatName         :: String
+                 , seatCapabilities :: Int
+                 , seatFocus        :: Int
+                 , seatDevices      :: [Input]
+                 } deriving (Eq, Show)
+
+instance FromJSON Seat where
+  parseJSON = withObject "Seat" $ \obj -> do
+    seatName         <- obj .: "name"
+    seatCapabilities <- obj .: "capabilities"
+    seatFocus        <- obj .: "focus"
+    seatDevices      <- obj .: "devices"
+
+    return Seat{..}
+
+getSeats :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Seat]
+getSeats = query GetSeats ""
