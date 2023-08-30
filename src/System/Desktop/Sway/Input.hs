@@ -13,10 +13,10 @@ import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
 getBindingModes :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
-getBindingModes = query GetBindingModes ""
+getBindingModes = query GET_BINDING_MODES ""
 
 getBindingState :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
-getBindingState = query GetBindingState "" >>= parseSway (.: "name")
+getBindingState = query GET_BINDING_STATE "" >>= parseSway (.: "name")
 
 data Input = Input { inputIdentifier      :: String
                    , inputName            :: String
@@ -47,7 +47,7 @@ instance FromJSON Input where
     return Input{..}
 
 getInputs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Input]
-getInputs = query GetInputs ""
+getInputs = query GET_INPUTS ""
 
 data Seat = Seat { seatName         :: String
                  , seatCapabilities :: Int
@@ -65,4 +65,4 @@ instance FromJSON Seat where
     return Seat{..}
 
 getSeats :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Seat]
-getSeats = query GetSeats ""
+getSeats = query GET_SEATS ""

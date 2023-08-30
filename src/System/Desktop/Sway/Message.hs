@@ -17,75 +17,75 @@ import           Data.List            (find)
 import           Data.Maybe
 import           Data.Word
 
-data MessageType = RunCommand
-                 | GetWorkspaces
-                 | Subscribe
-                 | GetOutputs
-                 | GetTree
-                 | GetMarks
-                 | GetBarConfig
-                 | GetVersion
-                 | GetBindingModes
-                 | GetConfig
-                 | SendTick
-                 | Sync
-                 | GetBindingState
-                 | GetInputs
-                 | GetSeats
+data MessageType = RUN_COMMAND
+                 | GET_WORKSPACES
+                 | SUBSCRIBE
+                 | GET_OUTPUTS
+                 | GET_TREE
+                 | GET_MARKS
+                 | GET_BAR_CONFIG
+                 | GET_VERSION
+                 | GET_BINDING_MODES
+                 | GET_CONFIG
+                 | SEND_TICK
+                 | SYNC
+                 | GET_BINDING_STATE
+                 | GET_INPUTS
+                 | GET_SEATS
                  deriving (Eq, Show)
 
-data EventType = WorkspaceEvent
-               | ModeEvent
-               | WindowEvent
-               | BarConfigUpdateEvent
-               | BindingEvent
-               | ShutdownEvent
-               | TickEvent
-               | BarStateUpdateEvent
-               | InputEvent
-               deriving (Eq, Show)
+data EventType   = WORKSPACE
+                 | MODE
+                 | WINDOW
+                 | BAR_CONFIG_UPDATE
+                 | BINDING
+                 | SHUTDOWN
+                 | TICK
+                 | BAR_STATE_UPDATE
+                 | INPUT
+                 deriving (Eq, Show)
 
 instance ToJSON EventType where
-  toJSON WorkspaceEvent       = "workspace"
-  toJSON ModeEvent            = "mode"
-  toJSON WindowEvent          = "window"
-  toJSON BarConfigUpdateEvent = "barconfig_update"
-  toJSON BindingEvent         = "binding"
-  toJSON ShutdownEvent        = "shutdown"
-  toJSON TickEvent            = "tick"
-  toJSON BarStateUpdateEvent  = "bar_state_update"
-  toJSON InputEvent           = "input"
+  toJSON WORKSPACE         = "workspace"
+  toJSON MODE              = "mode"
+  toJSON WINDOW            = "window"
+  toJSON BAR_CONFIG_UPDATE = "barconfig_update"
+  toJSON BINDING           = "binding"
+  toJSON SHUTDOWN          = "shutdown"
+  toJSON TICK              = "tick"
+  toJSON BAR_STATE_UPDATE  = "bar_state_update"
+  toJSON INPUT             = "input"
 
 msgCodes :: [(MessageType, Word32)]
 msgCodes =
-  [ (RunCommand,      0x00)
-  , (GetWorkspaces,   0x01)
-  , (Subscribe,       0x02)
-  , (GetOutputs,      0x03)
-  , (GetTree,         0x04)
-  , (GetMarks,        0x05)
-  , (GetBarConfig,    0x06)
-  , (GetVersion,      0x07)
-  , (GetBindingModes, 0x08)
-  , (GetConfig,       0x09)
-  , (SendTick,        0x0a)
-  , (Sync,            0x0b)
-  , (GetBindingState, 0x0c)
-  , (GetInputs,       0x64)
-  , (GetSeats,        0x65)
+  [ (RUN_COMMAND,       0x00000000)
+  , (GET_WORKSPACES,    0x00000001)
+  , (SUBSCRIBE,         0x00000002)
+  , (GET_OUTPUTS,       0x00000003)
+  , (GET_TREE,          0x00000004)
+  , (GET_MARKS,         0x00000005)
+  , (GET_BAR_CONFIG,    0x00000006)
+  , (GET_VERSION,       0x00000007)
+  , (GET_BINDING_MODES, 0x00000008)
+  , (GET_CONFIG,        0x00000009)
+  , (SEND_TICK,         0x0000000a)
+  , (SYNC,              0x0000000b)
+  , (GET_BINDING_STATE, 0x0000000c)
+  , (GET_INPUTS,        0x00000064)
+  , (GET_SEATS,         0x00000065)
   ]
 
 evtCodes :: [(EventType, Word32)]
 evtCodes =
-  [ (WorkspaceEvent,       0x80000000)
-  , (ModeEvent,            0x80000002)
-  , (WindowEvent,          0x80000003)
-  , (BarConfigUpdateEvent, 0x80000004)
-  , (BindingEvent,         0x80000005)
-  , (ShutdownEvent,        0x80000006)
-  , (TickEvent,            0x80000007)
-  , (BarStateUpdateEvent,  0x80000014)
-  , (InputEvent,           0x80000015)
+  [ (WORKSPACE,         0x80000000)
+  , (MODE,              0x80000002)
+  , (WINDOW,            0x80000003)
+  , (BAR_CONFIG_UPDATE, 0x80000004)
+  , (BINDING,           0x80000005)
+  , (SHUTDOWN,          0x80000006)
+  , (TICK,              0x80000007)
+  , (BAR_STATE_UPDATE,  0x80000014)
+  , (INPUT,             0x80000015)
   ]
 
 lookupRev :: (Foldable t, Eq a) => a -> t (b, a) -> Maybe b

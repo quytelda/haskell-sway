@@ -29,7 +29,7 @@ instance FromJSON SwayVersion where
     return SwayVersion{..}
 
 getVersion :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m SwayVersion
-getVersion = query GetVersion ""
+getVersion = query GET_VERSION ""
 
 getConfig :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
-getConfig = query GetConfig "" >>= parseSway (.: "config")
+getConfig = query GET_CONFIG "" >>= parseSway (.: "config")

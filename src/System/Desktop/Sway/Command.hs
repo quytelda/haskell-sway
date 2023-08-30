@@ -28,7 +28,7 @@ status = withObject "status" $ \obj -> do
 -- | Run a sway command.
 -- Send a RUN_COMMAND IPC message and return the reply payload.
 runCommand :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m ()
-runCommand cmd = query RunCommand cmd
+runCommand cmd = query RUN_COMMAND cmd
                  >>= parseSway results
                  >>= eitherToSway . sequence_
   where

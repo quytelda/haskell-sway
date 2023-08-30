@@ -94,7 +94,7 @@ query type1 bytes = do
 -- Request to receive any events of the given types from sway.
 subscribe :: (MonadError e m, FromString e, SendRecv s m) => [EventType] -> SwayT s m ()
 subscribe events = do
-  success <- query Subscribe (encode events)
+  success <- query SUBSCRIBE (encode events)
              >>= parseSway result
   unless success $
     throwString $ "subscribing failed: " <> show events
@@ -102,7 +102,7 @@ subscribe events = do
     result = withObject "success" (.: "success")
 
 sendTick :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m Bool
-sendTick payload = query SendTick payload >>= parseSway (.: "success")
+sendTick payload = query SEND_TICK payload >>= parseSway (.: "success")
 
 sync :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Bool
-sync = query Sync "" >>= parseSway (.: "success")
+sync = query SYNC "" >>= parseSway (.: "success")
