@@ -65,3 +65,15 @@ instance FromJSON Seat where
 
 getSeats :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Seat]
 getSeats = query GET_SEATS ""
+
+-- | An event generated when the binding mode changes.
+data ModeEvent = ModeEvent { modeChange      :: String
+                           , modePangoMarkup :: Bool
+                           } deriving (Eq, Show)
+
+instance FromJSON ModeEvent where
+  parseJSON = withObject "ModeEvent" $ \obj -> do
+    modeChange      <- obj .: "change"
+    modePangoMarkup <- obj .: "pango_markup"
+
+    return ModeEvent{..}
