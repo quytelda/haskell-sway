@@ -1,9 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 
 module System.Desktop.Sway.TypesSpec where
 
-import           Control.Monad.Trans.Except (throwE)
-import           Data.ByteString.Lazy       (ByteString)
+import           Control.Monad.Except
+import           Data.ByteString.Lazy      (ByteString)
 import           Data.IORef
 import           Test.Hspec
 
@@ -22,23 +23,25 @@ putMock (Mocket ref) = writeIORef ref
 getMock :: Mocket -> IO ByteString
 getMock (Mocket ref) = readIORef ref
 
-instance SendRecv Mocket where
+instance SendRecv Mocket IO where
   recv = getMock
   send = putMock
 
-returnUnit :: Monad m => SwayT s m ()
+returnUnit :: MonadError e m => SwayT s m ()
 returnUnit = return ()
 
-throwException :: Monad m => SwayT s m ()
-throwException = throwE "foo"
+throwException :: (MonadError e m, FromString e) => SwayT s m ()
+throwException = throwString "foo"
 
 specSway :: Spec
 specSway = describe "SwayT" $ do
   it "can return a wrapped value" $
-    runSwayT returnUnit () `shouldReturn` Right ()
+    let result = runSwayT returnUnit () :: Either String ()
+    in result `shouldBe` Right ()
 
   it "can return an exception value" $
-    runSwayT throwException () `shouldReturn` Left "foo"
+    let result = runSwayT throwException () :: Either String ()
+    in result `shouldBe` Left "foo"
 
   it "can send bytes" $ do
     mock <- newMock
@@ -48,5 +51,5 @@ specSway = describe "SwayT" $ do
   it "can receive bytes" $ do
     mock <- newMock
     putMock mock "foobar"
-    runSwayT recvBytes mock `shouldReturn` Right "foobar"
+    runSwayT recvBytes mock `shouldReturn` "foobar"
 

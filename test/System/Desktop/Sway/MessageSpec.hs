@@ -11,7 +11,7 @@ import           System.Desktop.Sway.Message
 -- Example IPC message that sends the `exit` command.
 -- Taken from the sway-ipc(7) man page.
 msg_RunCommand_exit :: Message
-msg_RunCommand_exit = Message RunCommand "exit"
+msg_RunCommand_exit = Message RUN_COMMAND "exit"
 
 bin_RunCommand_exit :: ByteString
 bin_RunCommand_exit = BL.pack [ 0x69, 0x33, 0x2d, 0x69
