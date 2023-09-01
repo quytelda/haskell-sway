@@ -27,7 +27,6 @@ library
   exposed-modules:
       System.Desktop.Sway.Bar
       System.Desktop.Sway.Command
-      System.Desktop.Sway.Exception
       System.Desktop.Sway.Input
       System.Desktop.Sway.IPC
       System.Desktop.Sway.Marks

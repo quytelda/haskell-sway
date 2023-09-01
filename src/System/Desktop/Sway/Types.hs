@@ -1,6 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE RecordWildCards       #-}
 
 {-|
 Description : Types and functions common to other modules.
@@ -18,11 +19,10 @@ import           Data.ByteString.Lazy           (ByteString)
 import           Network.Socket
 import qualified Network.Socket.ByteString.Lazy as SocketBL
 
-import           System.Desktop.Sway.Exception  hiding (fromString)
+type SwayT s m = ReaderT s m
 
 -- | The `Sway` monad represents a computation within the context of a
 -- sway IPC session.
-type SwayT s m = ReaderT s m
 type Sway = SwayT Socket IO
 
 -- | Unwrap a computation in the `SwayT` monad. This is the inverse of
@@ -46,6 +46,26 @@ instance SendRecv Socket IO where
 -- connection.
 getConnection :: Monad m => SwayT s m s
 getConnection = ask
+
+-- | A type class for error types that can be constructed from a
+-- string. This enables polymorphic exception handling; we can throw
+-- exceptions using String error messages and it will automatically be
+-- converted to the proper type (for example, an `IOError` for the
+-- `IO` monad).
+--
+-- See: https://stackoverflow.com/q/76963901/5129612
+class FromString a where
+  fromString :: String -> a
+
+instance FromString String where
+  fromString = id
+
+instance FromString IOError where
+  fromString = userError
+
+-- | Throw an error using a String as an error message.
+throwString :: (MonadError e m, FromString e) => String -> m a
+throwString = throwError . fromString
 
 -- | Lift an `Either String` into an `ErrorMonad e` where is some
 -- `FromString` instance.

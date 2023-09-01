@@ -17,7 +17,6 @@ import           Data.ByteString.Lazy          (ByteString)
 import           Network.Socket
 import           System.Environment            (lookupEnv)
 
-import           System.Desktop.Sway.Exception hiding (fromString)
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 

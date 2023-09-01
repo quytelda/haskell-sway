@@ -8,7 +8,6 @@ import           Data.Aeson
 import           Data.ByteString.Lazy          (ByteString)
 import qualified Data.Map.Strict               as Map
 
-import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types

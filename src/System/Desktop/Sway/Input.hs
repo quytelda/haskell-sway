@@ -7,7 +7,6 @@ import           Control.Monad
 import           Control.Monad.Except
 import           Data.Aeson
 
-import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types

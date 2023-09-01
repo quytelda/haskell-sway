@@ -7,7 +7,6 @@ import           Data.Aeson
 import           Data.Aeson.Types              (Parser, listParser)
 import           Data.ByteString.Lazy          (ByteString)
 
-import           System.Desktop.Sway.Exception
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
