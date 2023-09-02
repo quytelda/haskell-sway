@@ -32,3 +32,16 @@ getVersion = query GET_VERSION ""
 
 getConfig :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
 getConfig = query GET_CONFIG "" >>= parseSway (.: "config")
+
+-- | An event generated when IPC is shutting down.
+--
+-- Currently, the event has only one variant ("exit").
+data ShutdownEvent = ShutdownExit
+                   deriving (Eq, Show)
+
+instance FromJSON ShutdownEvent where
+  parseJSON = withObject "ShutdownEvent" $ \obj -> do
+    change <- obj .: "change"
+    case change of
+      "exit" -> return ShutdownExit
+      _      -> fail $ "Unrecognized shutdown event: " <> change
