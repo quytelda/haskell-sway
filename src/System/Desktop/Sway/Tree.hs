@@ -76,3 +76,33 @@ instance FromJSON Node where
 -- Send a `GET_TREE` IPC message and return the parsed result.
 getTree :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Node
 getTree = query GET_TREE ""
+
+-- | An event generated when a view-related change occurs.
+data WindowEvent = WindowNew            Node
+                 | WindowClose          Node
+                 | WindowFocus          Node
+                 | WindowTitle          Node
+                 | WindowFullscreenMode Node
+                 | WindowMove           Node
+                 | WindowFloating       Node
+                 | WindowUrgent         Node
+                 | WindowMark           Node
+                 deriving (Eq, Show)
+
+instance FromJSON WindowEvent where
+  parseJSON = withObject "WindowEvent" $ \obj -> do
+    change    <- obj .: "change"
+
+    let event = case change of
+          "new"             -> return WindowNew
+          "close"           -> return WindowClose
+          "focus"           -> return WindowFocus
+          "title"           -> return WindowTitle
+          "fullscreen_mode" -> return WindowFullscreenMode
+          "move"            -> return WindowMove
+          "floating"        -> return WindowFloating
+          "urgent"          -> return WindowUrgent
+          "mark"            -> return WindowMark
+          _                 -> fail $ "Unrecognized window event: " <> change
+
+    event <*> obj .: "container"
