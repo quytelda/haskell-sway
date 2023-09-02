@@ -159,3 +159,16 @@ msgDecode bytes =
   case runGetOrFail getMessage bytes of
     Left  (_, _, err) -> Left  err
     Right (_, _, msg) -> Right msg
+
+-- | Decode a binary sway IPC protocol message.
+msgDecode' :: ByteString -> Either String (ByteString, Message)
+msgDecode' bytes =
+  case runGetOrFail getMessage bytes of
+    Left  (_, _, err)      -> Left err
+    Right (bytes', _, msg) -> Right (bytes', msg)
+
+decodeMessages :: ByteString -> [Message]
+decodeMessages bytes =
+  case runGetOrFail getMessage bytes of
+    Left  _      -> []
+    Right (bytes', _, msg) -> msg : decodeMessages bytes'
