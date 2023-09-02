@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 {-|
 Description : Types and functions for communicating with the sway socket.
@@ -9,13 +10,13 @@ well as other clients.
 -}
 module System.Desktop.Sway.IPC where
 
-import           Control.Exception             (bracket)
+import           Control.Exception           (bracket)
 import           Control.Monad
 import           Control.Monad.Except
 import           Data.Aeson
-import           Data.ByteString.Lazy          (ByteString)
+import           Data.ByteString.Lazy        (ByteString)
 import           Network.Socket
-import           System.Environment            (lookupEnv)
+import           System.Environment          (lookupEnv)
 
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
@@ -99,6 +100,17 @@ subscribe events = do
     throwString $ "subscribing failed: " <> show events
   where
     result = withObject "success" (.: "success")
+
+data TickEvent = TickEvent { tickFirst   :: Bool
+                           , tickPayload :: String
+                           } deriving (Eq, Show)
+
+instance FromJSON TickEvent where
+  parseJSON = withObject "TickEvent" $ \obj -> do
+    tickFirst   <- obj .: "first"
+    tickPayload <- obj .: "payload"
+
+    return TickEvent{..}
 
 sendTick :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m Bool
 sendTick payload = query SEND_TICK payload >>= parseSway (.: "success")
