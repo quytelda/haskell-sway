@@ -5,8 +5,8 @@ module System.Desktop.Sway.Bar where
 
 import           Control.Monad.Except
 import           Data.Aeson
-import           Data.ByteString.Lazy          (ByteString)
-import qualified Data.Map.Strict               as Map
+import           Data.ByteString.Lazy        (ByteString)
+import qualified Data.Map.Strict             as Map
 
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
@@ -54,3 +54,16 @@ getBarConfig barID = query GET_BAR_CONFIG barID
 
 getBarIDs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
 getBarIDs = query GET_BAR_CONFIG ""
+
+-- | An event generated whenever the visibility of a bar changes.
+data BarStateUpdateEvent
+  = BarStateUpdateEvent { barStateId                :: String
+                        , barStateVisibleByModifier :: Bool
+                        } deriving (Eq, Show)
+
+instance FromJSON BarStateUpdateEvent where
+  parseJSON = withObject "BarStateUpdateEvent" $ \obj -> do
+    barStateId                <- obj .: "id"
+    barStateVisibleByModifier <- obj .: "visible_by_modifier"
+
+    return BarStateUpdateEvent{..}
