@@ -127,3 +127,24 @@ instance FromJSON BindingEvent where
     bindingInputType      <- binding .: "input_type"
 
     return BindingRun{..}
+
+-- | An event generated whenever an input device change occurs.
+data InputEvent = InputAdded          Input
+                | InputRemoved        Input
+                | InputXKBKeymap      Input
+                | InputXKBLayout      Input
+                | InputLibinputConfig Input
+                deriving (Eq, Show)
+
+instance FromJSON InputEvent where
+  parseJSON = withObject "InputEvent" $ \obj -> do
+    change <- obj .: "change"
+    let event = case change of
+          "added"           -> return InputAdded
+          "removed"         -> return InputRemoved
+          "xkb_keymap"      -> return InputXKBKeymap
+          "xkb_layout"      -> return InputXKBLayout
+          "libinput_config" -> return InputLibinputConfig
+          _                 -> fail $ "Unrecognized input event: " <> change
+
+    event <*> obj .: "input"
