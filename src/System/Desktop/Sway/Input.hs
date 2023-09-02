@@ -17,11 +17,40 @@ getBindingModes = query GET_BINDING_MODES ""
 getBindingState :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
 getBindingState = query GET_BINDING_STATE "" >>= parseSway (.: "name")
 
+-- | The type of an input device.
+--
+-- This property appears in `Input` and `BindingEvent`, but neither
+-- context makes use of all variants. Hence, the variants aren't
+-- necessarily disjoint with regarding what devices they may
+-- represent. For example, a physical mouse might be labelled either
+-- `Mouse` or `Pointer` depending on context.
+data InputType = Keyboard
+               | Mouse
+               | Pointer
+               | Touch
+               | TabletTool
+               | TabletPad
+               | Switch
+               deriving (Eq, Show)
+
+instance FromJSON InputType where
+  parseJSON = withText "InputType" $ \text ->
+    case text of
+      "keyboard"    -> return Keyboard
+      "mouse"       -> return Mouse
+      "pointer"     -> return Pointer
+      "touch"       -> return Touch
+      "tablet_tool" -> return TabletTool
+      "tablet_pad"  -> return TabletPad
+      "switch"      -> return Switch
+      _             -> fail $ "Unrecognized input type"
+
+-- | A description of an input source.
 data Input = Input { inputIdentifier      :: String
                    , inputName            :: String
                    , inputVendor          :: Int
                    , inputProduct         :: Int
-                   , inputType            :: String
+                   , inputType            :: InputType
                    , inputScrollFactor    :: Maybe Double
                    , inputLibinput        :: Maybe Object
                    , inputXKBLayoutNames  :: Maybe [String]
@@ -77,18 +106,6 @@ instance FromJSON ModeEvent where
     modePangoMarkup <- obj .: "pango_markup"
 
     return ModeEvent{..}
-
--- | A type of input device.
-data InputType = Keyboard
-               | Mouse
-               deriving (Eq, Show)
-
-instance FromJSON InputType where
-  parseJSON = withText "InputType" $ \text ->
-    case text of
-      "keyboard" -> return Keyboard
-      "mouse"    -> return Mouse
-      _          -> fail $ "Unrecognized input type"
 
 -- | An event generated whenever a binding is executed.
 --
