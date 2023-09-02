@@ -77,3 +77,36 @@ instance FromJSON ModeEvent where
     modePangoMarkup <- obj .: "pango_markup"
 
     return ModeEvent{..}
+
+-- | A type of input device.
+data InputType = Keyboard
+               | Mouse
+               deriving (Eq, Show)
+
+instance FromJSON InputType where
+  parseJSON = withText "InputType" $ \text ->
+    case text of
+      "keyboard" -> return Keyboard
+      "mouse"    -> return Mouse
+      _          -> fail $ "Unrecognized input type"
+
+-- | An event generated whenever a binding is executed.
+--
+-- Currently, the only binding event type is "run".
+data BindingEvent = BindingRun { bindingCommand        :: String
+                               , bindingEventStateMask :: [String]
+                               , bindingInputCode      :: Int
+                               , bindingSymbol         :: String
+                               , bindingInputType      :: InputType
+                               } deriving (Eq, Show)
+
+instance FromJSON BindingEvent where
+  parseJSON = withObject "BindingEvent" $ \obj -> do
+    binding               <- obj .: "binding"
+    bindingCommand        <- binding .: "command"
+    bindingEventStateMask <- binding .: "event_state_mask"
+    bindingInputCode      <- binding .: "input_code"
+    bindingSymbol         <- binding .: "symbol"
+    bindingInputType      <- binding .: "input_type"
+
+    return BindingRun{..}
