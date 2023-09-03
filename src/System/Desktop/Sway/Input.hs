@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+{-|
+Description : IPC functionality related to input devices.
+-}
 module System.Desktop.Sway.Input where
 
 import           Control.Monad
@@ -11,9 +14,11 @@ import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
+-- | Query the currently available binding modes.
 getBindingModes :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
 getBindingModes = query GET_BINDING_MODES ""
 
+-- | Query the currently active binding mode.
 getBindingState :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
 getBindingState = query GET_BINDING_STATE "" >>= parseSway (.: "name")
 
@@ -74,9 +79,14 @@ instance FromJSON Input where
 
     return Input{..}
 
+-- | Query the list of input devices.
 getInputs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Input]
 getInputs = query GET_INPUTS ""
 
+-- | A `Seat` represents a group of human-interface devices.
+--
+-- TODO: What does the seat abstraction represent in sway
+-- specifically?
 data Seat = Seat { seatName         :: String
                  , seatCapabilities :: Int
                  , seatFocus        :: Int
@@ -92,6 +102,7 @@ instance FromJSON Seat where
 
     return Seat{..}
 
+-- | Query the list of available seats.
 getSeats :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Seat]
 getSeats = query GET_SEATS ""
 

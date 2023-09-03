@@ -8,6 +8,7 @@ module System.Desktop.Sway.Rectangle where
 
 import Data.Aeson
 
+-- | A geometric rectangle.
 data Rectangle = Rectangle { rectX      :: Int
                            , rectY      :: Int
                            , rectWidth  :: Int

@@ -17,6 +17,7 @@ import           Data.List            (find)
 import           Data.Maybe
 import           Data.Word
 
+-- | The type of a synchronous sway IPC message.
 data MessageType = RUN_COMMAND
                  | GET_WORKSPACES
                  | SUBSCRIBE
@@ -34,6 +35,7 @@ data MessageType = RUN_COMMAND
                  | GET_SEATS
                  deriving (Eq, Show)
 
+-- | The type of an asynchronous sway IPC message (an event).
 data EventType   = WORKSPACE
                  | MODE
                  | WINDOW
@@ -56,6 +58,8 @@ instance ToJSON EventType where
   toJSON BAR_STATE_UPDATE  = "bar_state_update"
   toJSON INPUT             = "input"
 
+-- | A lookup table of message types and their corresponding 32-bit
+-- type code.
 msgCodes :: [(MessageType, Word32)]
 msgCodes =
   [ (RUN_COMMAND,       0x00000000)
@@ -75,6 +79,8 @@ msgCodes =
   , (GET_SEATS,         0x00000065)
   ]
 
+-- | A lookup table of event types and their corresponding 32-bit type
+-- code.
 evtCodes :: [(EventType, Word32)]
 evtCodes =
   [ (WORKSPACE,         0x80000000)
@@ -88,9 +94,23 @@ evtCodes =
   , (INPUT,             0x80000015)
   ]
 
-lookupRev :: (Foldable t, Eq a) => a -> t (b, a) -> Maybe b
+-- | A utility function for doing reverse lookups.
+--
+-- This is identical to the `lookup` function in `Prelude` but with
+-- the order each tuple reversed.
+lookupRev :: (Foldable t, Eq b) => b -> t (a, b) -> Maybe a
 lookupRev c t = fst <$> find (\p -> c == snd p) t
 
+-- | A sway IPC message.
+--
+-- There are two kinds of IPC messages: regular synchronous messages
+-- and asynchronous event messages. Both types use the same binary
+-- encoding format and are distinguished by their type code. The first
+-- byte of the type code is 0x00 for regular messages and 0x80 for
+-- events.
+--
+-- Every message also contains an arbitrary binary payload - usually a
+-- string containing JSON data.
 data Message = Message MessageType ByteString
              | Event   EventType   ByteString
              deriving (Eq, Show)

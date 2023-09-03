@@ -101,6 +101,10 @@ subscribe events = do
   where
     result = withObject "success" (.: "success")
 
+-- | An event generated whenever a client sends a tick.
+--
+-- This event may carry an arbitrary payload, represented here as a
+-- standard `String`.
 data TickEvent = TickEvent { tickFirst   :: Bool
                            , tickPayload :: String
                            } deriving (Eq, Show)
@@ -112,8 +116,17 @@ instance FromJSON TickEvent where
 
     return TickEvent{..}
 
+-- | Sends a TICK event with the given payload.
+--
+-- NOTE: This function sends a ByteString payload because the payload
+-- is embedded directly into a binary `Message`. However, it will be
+-- distributed to clients as a JSON string, so beware encoding issues.
 sendTick :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m Bool
 sendTick payload = query SEND_TICK payload >>= parseSway (.: "success")
 
+-- | Sends a SYNC message.
+--
+-- SYNC messages only exist in sway for i3 compatibility, and the
+-- query always returns a failure status.
 sync :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Bool
 sync = query SYNC "" >>= parseSway (.: "success")

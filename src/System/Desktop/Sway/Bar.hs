@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+
+{-|
+Description : IPC functionality related to status bars.
+-}
 module System.Desktop.Sway.Bar where
 
 import           Control.Monad.Except
@@ -29,6 +33,10 @@ data BarConfig = BarConfig { barId                   :: String
                            , barStatusEdgePadding    :: Int
                            } deriving (Eq, Show)
 
+-- | A representation of a status bar configuration.
+--
+-- Different status bars may or may not support reporting information
+-- about their configuration this way.
 instance FromJSON BarConfig where
   parseJSON = withObject "BarConfig" $ \obj -> do
     barId                   <- obj .: "id"
@@ -52,6 +60,11 @@ instance FromJSON BarConfig where
 getBarConfig :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m BarConfig
 getBarConfig barID = query GET_BAR_CONFIG barID
 
+-- | Return a list of the currently active status bars.
+--
+-- The IDs returned from this query can be used to request further
+-- information about a bar using `getBarConfig` or match status bar
+-- events affecting a particular bar.
 getBarIDs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
 getBarIDs = query GET_BAR_CONFIG ""
 

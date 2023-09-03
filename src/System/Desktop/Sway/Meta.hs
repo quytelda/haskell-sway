@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+{-|
+Description : General-purpose sway queries concerning sway itself.
+-}
 module System.Desktop.Sway.Meta where
 
 import           Control.Monad.Except
@@ -10,6 +13,7 @@ import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
+-- | Information about the sway version
 data SwayVersion = SwayVersion { versionMajor         :: Int
                                , versionMinor         :: Int
                                , versionPatch         :: Int
@@ -27,9 +31,11 @@ instance FromJSON SwayVersion where
 
     return SwayVersion{..}
 
+-- | Query the sway daemon about its version.
 getVersion :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m SwayVersion
 getVersion = query GET_VERSION ""
 
+-- | Query the contents of the currently active sway configuration.
 getConfig :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
 getConfig = query GET_CONFIG "" >>= parseSway (.: "config")
 
