@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+{-|
+Description : IPC functionality related to the view tree.
+-}
 module System.Desktop.Sway.Tree where
 
 import           Control.Monad.Except
@@ -12,6 +15,7 @@ import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Rectangle
 import           System.Desktop.Sway.Types
 
+-- | A type of view.
 data NodeType = RootNode
               | OutputNode
               | WorkspaceNode
@@ -19,6 +23,7 @@ data NodeType = RootNode
               | FloatingNode
               deriving (Eq, Show)
 
+-- | Parse a view type from a String.
 parseNodeType :: String -> Parser NodeType
 parseNodeType "root"         = return RootNode
 parseNodeType "output"       = return OutputNode
@@ -27,6 +32,7 @@ parseNodeType "con"          = return ContainerNode
 parseNodeType "floating_con" = return FloatingNode
 parseNodeType _              = fail "invalid node type"
 
+-- | A node in the view tree describing a particular view.
 data Node = Node { nodeID                 :: Int
                  , nodeName               :: Maybe String
                  , nodeType               :: NodeType

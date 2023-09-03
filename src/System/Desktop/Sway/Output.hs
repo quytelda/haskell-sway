@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+{-|
+Description : IPC functionality related to output devices.
+-}
 module System.Desktop.Sway.Output where
 
 import           Control.Monad.Except
@@ -11,6 +14,7 @@ import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Rectangle
 import           System.Desktop.Sway.Types
 
+-- | A representation of a monitor output mode.
 data OutputMode = OutputMode { modeWidth   :: Int
                              , modeHeight  :: Int
                              , modeRefresh :: Int
@@ -24,6 +28,7 @@ instance FromJSON OutputMode where
 
     return OutputMode{..}
 
+-- | A description of a graphical output device.
 data Output = Output { outputName             ::  String
                      , outputMake             ::  String
                      , outputModel            ::  String

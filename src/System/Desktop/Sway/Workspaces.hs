@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+{-|
+Description : IPC functionality related to workspaces.
+-}
 module System.Desktop.Sway.Workspaces where
 
 import           Control.Monad.Except

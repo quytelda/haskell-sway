@@ -1,11 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{-|
+Description : Types and functions for running sway commands.
+-}
 module System.Desktop.Sway.Command where
 
 import           Control.Monad.Except
 import           Data.Aeson
-import           Data.Aeson.Types              (Parser, listParser)
-import           Data.ByteString.Lazy          (ByteString)
+import           Data.Aeson.Types            (Parser, listParser)
+import           Data.ByteString.Lazy        (ByteString)
 
 import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message

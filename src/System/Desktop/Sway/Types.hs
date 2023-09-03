@@ -19,6 +19,13 @@ import           Data.ByteString.Lazy           (ByteString)
 import           Network.Socket
 import qualified Network.Socket.ByteString.Lazy as SocketBL
 
+-- | A monad transformer representing computations that occur within
+-- the context of a sway IPC session.
+--
+-- This is more general than `Sway` monad, which assumes communication
+-- occurs over a socket connection and requires `IO`. The transformer
+-- allows complete substitution of the connection backend without
+-- affecting `SwayT` computations.
 type SwayT s m = ReaderT s m
 
 -- | The `Sway` monad represents a computation within the context of a
