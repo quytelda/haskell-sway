@@ -29,7 +29,6 @@ library
       System.Desktop.Sway.Command
       System.Desktop.Sway.Input
       System.Desktop.Sway.IPC
-      System.Desktop.Sway.Marks
       System.Desktop.Sway.Message
       System.Desktop.Sway.Meta
       System.Desktop.Sway.Output
