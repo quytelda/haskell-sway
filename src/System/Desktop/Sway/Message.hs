@@ -96,7 +96,7 @@ evtCodes =
 
 -- | A utility function for doing reverse lookups.
 --
--- This is identical to the `lookup` function in `Prelude` but with
+-- This is identical to the `lookup` function in @Prelude@ but with
 -- the order each tuple reversed.
 lookupRev :: (Foldable t, Eq b) => b -> t (a, b) -> Maybe a
 lookupRev c t = fst <$> find (\p -> c == snd p) t

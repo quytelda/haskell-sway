@@ -16,6 +16,11 @@ import           System.Desktop.Sway.IPC
 import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
+-- | A representation of a status bar configuration.
+--
+-- Different status bars may or may not support reporting information
+-- about their configuration this way.
+--
 -- TODO: Implement more detailed types for barColors and barGaps
 data BarConfig = BarConfig { barId                   :: String
                            , barMode                 :: String
@@ -33,10 +38,6 @@ data BarConfig = BarConfig { barId                   :: String
                            , barStatusEdgePadding    :: Int
                            } deriving (Eq, Show)
 
--- | A representation of a status bar configuration.
---
--- Different status bars may or may not support reporting information
--- about their configuration this way.
 instance FromJSON BarConfig where
   parseJSON = withObject "BarConfig" $ \obj -> do
     barId                   <- obj .: "id"

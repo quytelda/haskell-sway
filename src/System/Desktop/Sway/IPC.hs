@@ -103,8 +103,7 @@ subscribe events = do
 
 -- | An event generated whenever a client sends a tick.
 --
--- This event may carry an arbitrary payload, represented here as a
--- standard `String`.
+-- This event may carry an arbitrary payload.
 data TickEvent = TickEvent { tickFirst   :: Bool
                            , tickPayload :: String
                            } deriving (Eq, Show)
