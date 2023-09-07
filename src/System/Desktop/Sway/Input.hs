@@ -15,11 +15,11 @@ import           System.Desktop.Sway.Message
 import           System.Desktop.Sway.Types
 
 -- | Query the currently available binding modes.
-getBindingModes :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
+getBindingModes :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m [String]
 getBindingModes = query GET_BINDING_MODES ""
 
 -- | Query the currently active binding mode.
-getBindingState :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
+getBindingState :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m String
 getBindingState = query GET_BINDING_STATE "" >>= parseSway (.: "name")
 
 -- | The type of an input device.
@@ -80,7 +80,7 @@ instance FromJSON Input where
     return Input{..}
 
 -- | Query the list of input devices.
-getInputs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Input]
+getInputs :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m [Input]
 getInputs = query GET_INPUTS ""
 
 -- | A `Seat` represents a group of human-interface devices.
@@ -103,7 +103,7 @@ instance FromJSON Seat where
     return Seat{..}
 
 -- | Query the list of available seats.
-getSeats :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Seat]
+getSeats :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m [Seat]
 getSeats = query GET_SEATS ""
 
 -- | An event generated when the binding mode changes.

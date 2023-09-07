@@ -80,11 +80,11 @@ instance FromJSON Node where
 
 -- | Get the current layout tree.
 -- Send a `GET_TREE` IPC message and return the parsed result.
-getTree :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Node
+getTree :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m Node
 getTree = query GET_TREE ""
 
 -- | Get the list of marks currently set.
-getMarks :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
+getMarks :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m [String]
 getMarks = query GET_MARKS ""
 
 -- | An event generated when a view-related change occurs.

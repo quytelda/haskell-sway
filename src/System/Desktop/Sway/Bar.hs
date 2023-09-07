@@ -58,7 +58,7 @@ instance FromJSON BarConfig where
     return BarConfig{..}
 
 -- | Get the list of marks currently set.
-getBarConfig :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m BarConfig
+getBarConfig :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => ByteString -> SwayT r w m BarConfig
 getBarConfig barID = query GET_BAR_CONFIG barID
 
 -- | Return a list of the currently active status bars.
@@ -66,7 +66,7 @@ getBarConfig barID = query GET_BAR_CONFIG barID
 -- The IDs returned from this query can be used to request further
 -- information about a bar using `getBarConfig` or match status bar
 -- events affecting a particular bar.
-getBarIDs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [String]
+getBarIDs :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m [String]
 getBarIDs = query GET_BAR_CONFIG ""
 
 -- | An event generated whenever the visibility of a bar changes.

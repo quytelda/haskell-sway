@@ -58,31 +58,31 @@ withSwaySocket f = findSwaySocket >>= \case
   Nothing   -> fail "Unable to get sway socket path."
 
 -- | Send bytes to the sway socket.
-sendBytes :: SendRecv s m => ByteString -> SwayT s m ()
+sendBytes :: (Monoid w, SendRecv r m) => ByteString -> SwayT r w m ()
 sendBytes bytes = getConnection >>= lift . flip send bytes
 
 -- | Receive bytes from the sway socket.
-recvBytes :: SendRecv s m => SwayT s m ByteString
+recvBytes :: (Monoid w, SendRecv r m) => SwayT r w m ByteString
 recvBytes = getConnection >>= lift . recv
 
 -- | Send a `Message` over the sway socket.
-sendMessage :: SendRecv s m => Message -> SwayT s m ()
+sendMessage :: (Monoid w, SendRecv r m) => Message -> SwayT r w m ()
 sendMessage = sendBytes . msgEncode
 
 -- | Receive a `Message` from the sway socket.
 -- Throws an exception if the message parsing fails.
-recvMessage :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Message
+recvMessage :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m Message
 recvMessage = recvBytes >>= eitherToSway . msgDecode
 
 -- | Send an IPC message and receive the reply.
-ipc :: (MonadError e m, FromString e, SendRecv s m) => Message -> SwayT s m Message
+ipc :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => Message -> SwayT r w m Message
 ipc msg = sendMessage msg >> recvMessage
 
 -- | Send a sway IPC message, receive the reply, and parse it's payload.
 -- Construct the outgoing IPC message with the given type and payload.
 -- Fail if the outgoing and incoming types don't match.
-query :: (MonadError e m, FromString e, SendRecv s m, FromJSON a) =>
-         MessageType -> ByteString -> SwayT s m a
+query :: (Monoid w, MonadError e m, FromString e, SendRecv r m, FromJSON a) =>
+         MessageType -> ByteString -> SwayT r w m a
 query type1 bytes = do
   reply <- ipc $ Message type1 bytes
   case reply of
@@ -92,7 +92,7 @@ query type1 bytes = do
 
 -- | Subscribe to IPC events.
 -- Request to receive any events of the given types from sway.
-subscribe :: (MonadError e m, FromString e, SendRecv s m) => [EventType] -> SwayT s m ()
+subscribe :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => [EventType] -> SwayT r w m ()
 subscribe events = do
   success <- query SUBSCRIBE (encode events)
              >>= parseSway result
@@ -120,12 +120,12 @@ instance FromJSON TickEvent where
 -- NOTE: This function sends a ByteString payload because the payload
 -- is embedded directly into a binary `Message`. However, it will be
 -- distributed to clients as a JSON string, so beware encoding issues.
-sendTick :: (MonadError e m, FromString e, SendRecv s m) => ByteString -> SwayT s m Bool
+sendTick :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => ByteString -> SwayT r w m Bool
 sendTick payload = query SEND_TICK payload >>= parseSway (.: "success")
 
 -- | Sends a SYNC message.
 --
 -- SYNC messages only exist in sway for i3 compatibility, and the
 -- query always returns a failure status.
-sync :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m Bool
+sync :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m Bool
 sync = query SYNC "" >>= parseSway (.: "success")

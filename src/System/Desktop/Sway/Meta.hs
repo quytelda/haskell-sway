@@ -32,11 +32,11 @@ instance FromJSON SwayVersion where
     return SwayVersion{..}
 
 -- | Query the sway daemon about its version.
-getVersion :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m SwayVersion
+getVersion :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m SwayVersion
 getVersion = query GET_VERSION ""
 
 -- | Query the contents of the currently active sway configuration.
-getConfig :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m String
+getConfig :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m String
 getConfig = query GET_CONFIG "" >>= parseSway (.: "config")
 
 -- | An event generated when IPC is shutting down.

@@ -68,5 +68,5 @@ instance FromJSON Output where
 
 -- | Get the list of sway outputs.
 -- Send a `GET_OUTPUTS` IPC message and return the parsed results.
-getOutputs :: (MonadError e m, FromString e, SendRecv s m) => SwayT s m [Output]
+getOutputs :: (Monoid w, MonadError e m, FromString e, SendRecv r m) => SwayT r w m [Output]
 getOutputs = query GET_OUTPUTS ""
